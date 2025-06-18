@@ -15,6 +15,7 @@
             "url": "https://raw.githubusercontent.com/qihaoyyds/uz/main/js/danMu2.txt",
             "codeID": "4Y6DDMATfbw0Rg0Y2AOGpfmpU2cgspFf",
             "order": "A01",
+            "env": "弹幕解析地址##内置 4 条线路。格式 地址1;地址2",
             "remark": "搜不到就算了",
             "version": 11,
             "type": 400
