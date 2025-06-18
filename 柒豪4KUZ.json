@@ -1,0 +1,205 @@
+{
+    "panTools": [
+        {
+            "name": "网盘解析工具",
+            "version": 21,
+            "remark": "柒豪网盘解析",
+            "env": "UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/panTools2.js",
+            "type": 300
+        }
+    ],
+    "danMu": [
+        {
+            "name": "弹幕",
+            "url": "https://gitee.com/qihaoyyds/uz/raw/master/js/danmu.txt",
+            "codeID": "4Y6DDMATfbw0Rg0Y2AOGpfmpU2cgspFf",
+            "order": "A01",
+            "remark": "搜不到就算了",
+            "version": 11,
+            "type": 400
+        }
+    ],
+    "vod": [
+        {
+            "name": "玩偶 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/wanou.js",
+            "webSite": "http://wogg.xxooo.cf",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "木偶 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/muou.js",
+            "webSite": "https://123.666291.xyz/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "多多 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/duoduo.js",
+            "webSite": "https://tv.yydsys.cc",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "蜡笔 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/labi.js",
+            "webSite": "https://feimaoai.site",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "闪电 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/shandian.js",
+            "webSite": "http://1.95.79.193/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "至臻 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/zhizhen.js",
+            "webSite": "https://xiaomi666.fun/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "欧歌 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/ouge.js",
+            "webSite": "https://woog.nxog.eu.org/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "下饭 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/xiafan.js",
+            "webSite": "http://154.204.177.231",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "虎斑 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/huban.js",
+            "webSite": "http://43.138.242.105:9696/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "二小 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/erxiao.js",
+            "webSite": "https://xhww.net/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "百家 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/bajia.js",
+            "webSite": "http://baijia.dpdns.org/",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "大玩 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/dawan.js",
+            "webSite": "http://149.88.87.18:6688",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "奥秘 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/aomi.js",
+            "webSite": "https://vip.omii.top",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "清影 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/qingying.js",
+            "webSite": "https://revohd.com",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
+            "name": "雷鲸 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/leijing.js",
+            "codeID": "GgryhjYVgQMDUw4f",
+            "instance": "leiJing20241126",
+            "webSite": "https://www.leijing.xyz",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "4",
+            "type": 100
+        },
+        {
+            "name": "天翼 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/tianyi.js",
+            "codeID": "DU9z425w42hk9B8l",
+            "instance": "tianyiso20241129",
+            "webSite": "https://www.tianyiso.com",
+            "remark": "「仅限搜索」",
+            "version": "3",
+            "type": 100
+        },
+        {
+            "name": "趣盘 | 4K",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/qupan.js",
+            "codeID": "LO5aQSJYBZLrRD1g",
+            "instance": "funletu20241124",
+            "webSite": "https://pan.funletu.com",
+            "remark": "「仅限搜索」",
+            "version": "3",
+            "type": 100
+        },
+        {
+            "name": "PanSearch | 4K",
+            "version": 1,
+            "remark": "「仅限搜索」",
+            "webSite": "https://www.pansearch.me",
+            "codeID": "UM9WK6x3sPm3mbUgJB2dJNs59vTyNynm",
+            "instance": "leiJing20241126",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/pansearch.js",
+            "type": 101
+        },
+        {
+            "name": "TG | 搜索",
+            "version": 2,
+            "remark": "Q群511873584 「柒豪」维护",
+            "env": "TG搜代理地址##默认直接访问 https://t.me/s/ 有自己的代理服务填入即可，没有不用改动。",
+            "webSite": "123资源@zyfb123&天翼日更@tianyirigeng&木偶UC@ucpanpan&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&夸克短剧@zdqxm&肯德基@XiangxiuNB&奥斯卡@Oscar_4Kmovies",
+            "order": "B",
+            "api": "https://gitee.com/qihaoyyds/uz/raw/master/js/tgso.js",
+            "type": 101
+        }
+    ]
+}
