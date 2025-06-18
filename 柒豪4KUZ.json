@@ -193,6 +193,15 @@
             "type": 101
         },
         {
+            "name": "南风 | 短剧",
+            "version": 1,
+            "remark": "Q群511873584 「柒豪」维护",
+            "webSite": "https://www.nanf.cc",
+            "order": "B",
+            "api": "https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
+            "type": 101
+        },
+        {
             "name": "TG | 搜索",
             "version": 2,
             "remark": "Q群511873584 「柒豪」维护",
