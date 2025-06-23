@@ -1,7 +1,3 @@
-//@name:[盘] 欧歌
-//@version:3
-//@webSite:https://woog.nxog.eu.org
-//@remark:
 //@order: B
 const appConfig = {
     _webSite: 'https://woog.nxog.eu.org',
