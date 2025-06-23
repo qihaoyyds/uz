@@ -113,6 +113,15 @@
             "type": 101
         },
         {
+            "name": "虎斑 | 4K",
+            "order": "B",
+            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/huban.js",
+            "webSite": "http://103.45.162.207:20720",
+            "remark": "Q群511873584 「柒豪」维护",
+            "version": "3",
+            "type": 101
+        },
+        {
             "name": "雷鲸 | 4K",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/leijing.js",
