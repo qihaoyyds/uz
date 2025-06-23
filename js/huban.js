@@ -37,35 +37,29 @@ const appConfig = {
  */
 async function getClassList(args) {
     var backData = new RepVideoClassList()
-    backData.data = [
-        {
+    backData.data = [{
             type_id: '1',
-            type_name: '小虎斑影',
+            type_name: '虎斑电影',
             hasSubclass: false,
         },
         {
             type_id: '2',
-            type_name: '小虎斑剧',
-            hasSubclass: false,
-        },
-        {
-            type_id: '4',
-            type_name: '小虎斑漫',
+            type_name: '虎斑剧集',
             hasSubclass: false,
         },
         {
             type_id: '3',
-            type_name: '小虎斑综',
+            type_name: '虎斑综艺',
             hasSubclass: false,
         },
         {
-            type_id: '5',
-            type_name: '小虎斑精',
+            type_id: '4',
+            type_name: '虎斑动漫',
             hasSubclass: false,
         },
         {
             type_id: '6',
-            type_name: '小虎斑短',
+            type_name: '虎斑短剧',
             hasSubclass: false,
         },
     ]
