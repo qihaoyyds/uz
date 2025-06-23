@@ -1,5 +1,6 @@
+//@order: B
 const appConfig = {
-    _webSite: 'https://666.666291.xyz',
+    _webSite: 'https://666.666291.xyz/',
     /**
      * 网站主页，uz 调用每个函数前都会进行赋值操作
      * 如果不想被改变 请自定义一个变量

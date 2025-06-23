@@ -1,3 +1,4 @@
+//@order: B
 const appConfig = {
     _webSite: 'https://feimaoai.site/',
     /**

@@ -1,3 +1,4 @@
+//@order: B
 const appConfig = {
     _webSite: 'http://1.95.79.193/',
     /**

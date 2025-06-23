@@ -1,3 +1,4 @@
+//@order: B
 const appConfig = {
     _webSite: 'http://baijia.dpdns.org/',
     /**
