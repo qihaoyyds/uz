@@ -71,7 +71,7 @@
             "name": "至臻 | 4K",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/zhizhen.js",
-            "webSite": "https://xiaomi666.fun/",
+            "webSite": "https://xiaomiai.site/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
             "type": 101
@@ -95,15 +95,6 @@
             "type": 101
         },
         {
-            "name": "虎斑 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/huban.js",
-            "webSite": "http://43.138.242.105:9696/",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
             "name": "二小 | 4K",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/erxiao.js",
@@ -113,37 +104,10 @@
             "type": 101
         },
         {
-            "name": "百家 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/bajia.js",
-            "webSite": "http://baijia.dpdns.org/",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
-            "name": "大玩 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/dawan.js",
-            "webSite": "http://149.88.87.18:6688",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
             "name": "奥秘 | 4K",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/aomi.js",
             "webSite": "https://vip.omii.top",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
-            "name": "清影 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/qingying.js",
-            "webSite": "https://revohd.com",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
             "type": 101
