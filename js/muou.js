@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:https://666.666291.xyz/
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'https://666.666291.xyz/',
     /**

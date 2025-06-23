@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:https://xhww.net/
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'https://xhww.net/',
     /**

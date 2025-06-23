@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:http://wogg.xxooo.cf
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'http://wogg.xxooo.cf',
     /**

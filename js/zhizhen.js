@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:https://xiaomiai.site/
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'https://xiaomiai.site/',
     /**

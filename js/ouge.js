@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:https://woog.nxog.eu.org
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'https://woog.nxog.eu.org',
     /**

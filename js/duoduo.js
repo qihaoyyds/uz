@@ -1,4 +1,9 @@
+// ignore
+//@version:1
+//@webSite:https://tv.yydsys.cc
+//@remark:
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'https://tv.yydsys.cc',
     /**
