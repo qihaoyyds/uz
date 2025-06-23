@@ -1,5 +1,7 @@
 //@webSite:http://103.45.162.207:20720/
+//@version:1
 //@order: B
+// ignore
 const appConfig = {
     _webSite: 'http://103.45.162.207:20720/',
     /**
