@@ -1,3 +1,4 @@
+//@webSite:http://103.45.162.207:20720
 //@order: B
 const appConfig = {
     _webSite: 'http://baijia.dpdns.org/',
