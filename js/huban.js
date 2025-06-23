@@ -1,5 +1,7 @@
-//@webSite:http://103.45.162.207:20720/
+// ignore
 //@version:1
+//@webSite:http://103.45.162.207:20720/
+//@remark:
 //@order: B
 // ignore
 const appConfig = {
@@ -35,24 +37,35 @@ const appConfig = {
  */
 async function getClassList(args) {
     var backData = new RepVideoClassList()
-    backData.data = [{
+    backData.data = [
+        {
             type_id: '1',
-            type_name: '虎斑电影',
+            type_name: '小虎斑影',
             hasSubclass: false,
         },
         {
             type_id: '2',
-            type_name: '虎斑剧集',
-            hasSubclass: false,
-        },
-        {
-            type_id: '3',
-            type_name: '虎斑综艺',
+            type_name: '小虎斑剧',
             hasSubclass: false,
         },
         {
             type_id: '4',
-            type_name: '虎斑动漫',
+            type_name: '小虎斑漫',
+            hasSubclass: false,
+        },
+        {
+            type_id: '3',
+            type_name: '小虎斑综',
+            hasSubclass: false,
+        },
+        {
+            type_id: '5',
+            type_name: '小虎斑精',
+            hasSubclass: false,
+        },
+        {
+            type_id: '6',
+            type_name: '小虎斑短',
             hasSubclass: false,
         },
     ]
@@ -75,11 +88,10 @@ async function getVideoList(args) {
     var backData = new RepVideoList()
     let url =
         UZUtils.removeTrailingSlash(appConfig.webSite) +
-        `/vodshow/${args.url}--------${args.page}---.html`
+        `/index.php/vod/show/id/${args.url}/page/${args.page}.html`
     try {
         const pro = await req(url)
         backData.error = pro.error
-
         let videos = []
         if (pro.data) {
             const $ = cheerio.load(pro.data)
@@ -94,6 +106,10 @@ async function getVideoList(args) {
                     .find('.module-item-pic img')
                     .attr('data-src')
                 videoDet.vod_remarks = $(e).find('.module-item-text').text()
+                videoDet.vod_year = $(e)
+                    .find('.module-item-caption span')
+                    .first()
+                    .text()
                 videos.push(videoDet)
             })
         }
@@ -139,8 +155,12 @@ async function getVideoDetail(args) {
                     .filter(Boolean) // 过滤掉 null 和空字符串
                     .join(', ') // 用逗号和空格分割
 
-                if (key.includes('年代')) {
-                    vodDetail.vod_year = value.trim()
+                if (key.includes('剧情')) {
+                    vodDetail.vod_content = $(item)
+                        .next()
+                        .find('p')
+                        .text()
+                        .trim()
                 } else if (key.includes('导演')) {
                     vodDetail.vod_director = value.trim()
                 } else if (key.includes('主演')) {
@@ -184,13 +204,9 @@ async function getVideoPlayUrl(args) {
 async function searchVideo(args) {
     var backData = new RepVideoList()
     try {
-        let searchUrl = combineUrl(
-            'vodsearch/' +
-            args.searchWord +
-            '----------' +
-            args.page +
-            '---.html'
-        )
+        let searchUrl = `${UZUtils.removeTrailingSlash(
+            appConfig.webSite
+        )}/index.php/vod/search/page/${args.page}/wd/${args.searchWord}.html`
         let repData = await req(searchUrl)
 
         const $ = cheerio.load(repData.data)
