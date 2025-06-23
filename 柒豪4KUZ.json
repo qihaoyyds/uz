@@ -139,7 +139,7 @@
             "codeID": "DU9z425w42hk9B8l",
             "instance": "tianyiso20241129",
             "webSite": "https://www.tianyiso.com",
-            "remark": "「仅限搜索」",
+            "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
             "type": 100
         },
@@ -150,19 +150,29 @@
             "codeID": "LO5aQSJYBZLrRD1g",
             "instance": "funletu20241124",
             "webSite": "https://pan.funletu.com",
-            "remark": "「仅限搜索」",
+            "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
             "type": 100
         },
         {
             "name": "PanSearch | 搜索",
             "version": 1,
-            "remark": "「仅限搜索」",
+            "remark": "Q群511873584 「柒豪」维护",
             "webSite": "https://www.pansearch.me",
             "codeID": "UM9WK6x3sPm3mbUgJB2dJNs59vTyNynm",
             "instance": "leiJing20241126",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/pansearch.js",
+            "type": 101
+        },
+        {
+            "name": "TG | 搜索",
+            "version": 5,
+            "remark": "Q群511873584 「柒豪」维护",
+            "env": "TG搜API地址##https://tgsou.252035.xyz",
+            "webSite": "123资源@zyfb123|2&夸克UC@ucquark|5&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&鱼哥资源@yggpan&CH资源@ChangAn2504",
+            "order": "B",
+            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tgso.js",
             "type": 101
         },
         {
@@ -172,16 +182,6 @@
             "webSite": "https://www.nanf.cc",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
-            "type": 101
-        },
-        {
-            "name": "TG | 搜索",
-            "version": 5,
-            "remark": "「仅限搜索」",
-            "env": "TG搜API地址##https://tgsou.252035.xyz",
-            "webSite": "123资源@zyfb123|2&夸克UC@ucquark|5&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&鱼哥资源@yggpan&CH资源@ChangAn2504",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tgso.js",
             "type": 101
         }
     ]
