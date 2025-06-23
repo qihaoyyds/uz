@@ -1,8 +1,8 @@
-//@name:TG搜
-//@version:2
-//@webSite:123资源@zyfb123&天翼日更@tianyirigeng&木偶UC@ucpanpan&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation
-//@env:TG搜代理地址##默认直接访问 https://t.me/s/ 有自己的代理服务填入即可，没有不用改动。
-//@remark:格式 频道名称1@频道id1&频道名称2@频道id2
+//@name:TG纯搜
+//@version:4
+//@webSite:123资源@zyfb123|2&夸克UC@ucquark|5&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&鱼哥资源@yggpan&CH资源@ChangAn2504
+//@env:TG搜API地址##https://tgsou.252035.xyz
+//@remark:免代理纯搜索无图片，格式 频道名称@频道id|搜索数量&频道名称@频道id，支持自定义每频道搜索数量，默认3个，支持5种网盘：天翼/夸克/UC/阿里/123
 //@order: B
 
 // ignore
@@ -48,13 +48,8 @@ import {
 import { cheerio, Crypto, Encrypt, JSONbig } from '../../core/core/uz3lib.js'
 // ignore
 
-//MARK: 注意
-// 直接复制该文件进行扩展开发
-// 请保持以下 变量 及 函数 名称不变
-// 请勿删减，可以新增
-
 const appConfig = {
-    _webSite: '123资源@zyfb123&天翼日更@tianyirigeng&木偶UC@ucpanpan&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation',
+    _webSite: '123资源@zyfb123|2&夸克UC@ucquark|5&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&鱼哥资源@yggpan&CH资源@ChangAn2504',
     /**
      * 网站主页，uz 调用每个函数前都会进行赋值操作
      * 如果不想被改变 请自定义一个变量
@@ -66,7 +61,8 @@ const appConfig = {
         this._webSite = value
     },
 
-    tgs: 'https://t.me/s/',
+    // TG搜索API地址，替代原来的 t.me/s/
+    tgs: 'https://tgsou.252035.xyz',
 
     _uzTag: '',
     /**
@@ -81,28 +77,46 @@ const appConfig = {
     },
 }
 
-// --- Global Constants/Configuration ---
-const providerMap = [
-    { name: '天翼', keywords: ['189.cn'] },
-    { name: '夸克', keywords: ['pan.quark.cn'] },
-    { name: 'UC', keywords: ['drive.uc.cn'] },
-    { name: '阿里', keywords: ['alipan.com'] },
-    { name: '123', keywords: ['123684.com', '123865.com', '123912.com', '123pan.com', '123pan.cn'] }
-];
+// --- 全局常量/配置 ---
+// 统一的网盘配置 - 仅支持UZ应用兼容的网盘
+const CLOUD_PROVIDERS = {
+    tianyi: {
+        name: '天翼',
+        domains: ['189.cn']
+    },
+    quark: {
+        name: '夸克',
+        domains: ['pan.quark.cn']
+    },
+    uc: {
+        name: 'UC',
+        domains: ['drive.uc.cn']
+    },
+    ali: {
+        name: '阿里',
+        domains: ['alipan.com', 'aliyundrive.com']
+    },
+    pan123: {
+        name: '123',
+        domains: ['123pan.com', '123pan.cn', '123684.com', '123912.com', '123865.com']
+    }
+    // 注意：百度网盘和115网盘在UZ应用中不支持，已移除
+};
 
-const panUrlsExt = [
-    '189.cn', //天翼
-    '123684.com', // 123
-    '123865.com',
-    '123912.com',
-    '123pan.com',
-    '123pan.cn',
-    '123592.com',
-    'pan.quark.cn', // 夸克
-    'drive.uc.cn', // uc
-    'alipan.com', // 阿里
-];
-// --- End Global Constants ---
+// 从统一配置自动生成所需数组
+const panUrlsExt = Object.values(CLOUD_PROVIDERS).flatMap(provider => provider.domains);
+
+// 预编译网盘提供商正则表达式，提高匹配性能
+const providerRegexMap = Object.values(CLOUD_PROVIDERS).map(provider => ({
+    name: provider.name,
+    // 将多个域名组合成一个正则，用 | 分隔，转义点号
+    regex: new RegExp(provider.domains.map(domain =>
+        domain.replace(/\./g, '\\.')
+    ).join('|'), 'i')
+}));
+
+// 预编译剧集信息提取正则表达式
+const EPISODE_COMBINED_REGEX = /((?:更新至|全|第)\s*\d+\s*集)|((?:更新至|全|第)\s*[一二三四五六七八九十百千万亿]+\s*集)|((?:更至|更)\s*(?:EP)?\s*\d+)/;
 
 /**
  * 异步获取分类列表的方法。
@@ -112,20 +126,8 @@ const panUrlsExt = [
 async function getClassList(args) {
     var backData = new RepVideoClassList()
     try {
-        var tgs = await getEnv(appConfig.uzTag,"TG搜代理地址")
-        if (tgs && tgs.length > 0) {
-            appConfig.tgs = tgs
-        }
-
-
-        appConfig.webSite.split('&').forEach((item) => {
-            let name = item.split('@')[0]
-            let id = item.split('@')[1]
-            backData.data.push({
-                type_id: id,
-                type_name: name,
-            })
-        })
+        // 纯搜索版本，不提供分类功能
+        // 返回空分类列表
     } catch (error) {
         backData.error = error.toString()
     }
@@ -140,14 +142,13 @@ async function getClassList(args) {
 async function getSubclassList(args) {
     var backData = new RepVideoSubclassList()
     try {
+        // 纯搜索版本，不提供二级分类功能
     } catch (error) {
         backData.error = error.toString()
     }
     return JSON.stringify(backData)
 }
 
-
-const _videoListPageMap = {}
 /**
  * 获取分类视频列表
  * @param {UZArgs} args
@@ -156,205 +157,11 @@ const _videoListPageMap = {}
 async function getVideoList(args) {
     var backData = new RepVideoList()
     try {
-        let endUrl = appConfig.tgs + args.url
-        if(args.page == 1) {
-            _videoListPageMap[args.url] = ""
-        }else {
-            const nextPage = _videoListPageMap[args.url] ?? ""
-            if(nextPage.length == 0 || nextPage == "0") {
-                return JSON.stringify(backData)
-            }
-            endUrl += nextPage
-        }
-        const res = await getTGList(endUrl, false)
-        // Deduplicate results before returning
-        backData.data = deduplicateVideoListByLinks(res.videoList);
-        _videoListPageMap[args.url] = res.nextPage
+        // 纯搜索版本，不提供分类浏览功能
     } catch (error) {
         backData.error = error.toString()
     }
     return JSON.stringify(backData)
-}
-
-
-async function getTGList(url, isSearchContext = false){
-    let videoList = []
-    let nextPage = ""
-
-    // --- Extract Channel ID and Name ---
-    let currentChannelId = null;
-    const urlMatch = url.match(/\/s\/([^/?]+)/);
-    if (urlMatch && urlMatch[1]) {
-        currentChannelId = urlMatch[1];
-    }
-
-    const channelMap = new Map();
-    appConfig.webSite.split('&').forEach(item => {
-        const parts = item.split('@');
-        if (parts.length === 2) {
-            channelMap.set(parts[1], parts[0]); // key: id, value: name
-        }
-    });
-
-    const currentChannelName = currentChannelId ? (channelMap.get(currentChannelId) || '未知频道') : '未知频道';
-    // --- End Extract ---
-
-    try {
-        const res = await req(url)
-        const $ = cheerio.load(res.data)
-          nextPage = $('link[rel="prev"]').attr('href')?.split('?')?.[1]
-
-        const messageList = $('.tgme_widget_message_bubble')
-        for (let i = 0; i < messageList.length; i++) {
-            const message = messageList[i]
-            const aList = $(message).find('a')
-            const video = new VideoDetail()
-
-            // --- Extract Message ID ---
-            const postIdStr = $(message).attr('data-post')?.split('/')?.[1];
-            video.message_id = parseInt(postIdStr) || 0; // Store message ID
-            // --- End Extract Message ID ---
-
-            for (let j = 0; j < aList.length; j++) {
-                const a = aList[j]
-                const style = $(a).attr('style')
-
-                if (style && style.includes('image')) {
-                    const regex = /url\(['"]?(https?:\/\/[^'")]+)['"]?\)/
-                    const match = style.match(regex)
-                    if (match) {
-                        const imageUrl = match[1]
-                        video.vod_pic = imageUrl
-                        break
-                    }
-                }
-            }
-            const time = $(message).find('time').attr('datetime')
-
-            const date = new Date(time)
-            const formattedDate = date
-                .toLocaleString('zh-CN', {
-                    month: '2-digit',
-                    day: '2-digit',
-                })
-                .replace(/\//g, '-')
-
-            const htmlContent = $('div.tgme_widget_message_text').html()
-            // 取到第一个 <br> 之前的内容
-            const cleanedTitle = htmlContent
-                .split('<br>')[0]
-                ?.replace(/<[^>]+>/g, "")
-                ?.trim()
-                ?.replace(/^(名称[：:])/, '')
-                ?.trim()
-
-            // Assign initial cleaned title first
-            video.vod_name = cleanedTitle ?? '';
-            const ids = _getAllPanUrls(message)
-            video.vod_id = JSON.stringify(ids)
-
-            // --- New Remark Logic: Determine provider from URLs --- 
-            let providers = new Set();
-
-            if (ids && ids.length > 0) {
-                for (const url of ids) {
-                    for (const provider of providerMap) {
-                        for (const keyword of provider.keywords) {
-                            if (url.includes(keyword)) {
-                                providers.add(provider.name);
-                                // Optional: break inner loop if one keyword match is enough per provider
-                                break; 
-                            }
-                        }
-                        // Optional: if providers set already contains this provider, maybe break outer loop too?
-                        // Depends on whether we need to check all URLs even if provider is known.
-                        // Let's keep checking all URLs for now.
-                    }
-                }
-            }
-
-            // --- Try to extract episode/season info from title --- (Moved here)
-            // Define separate regex for Arabic and Chinese numerals
-            const regexArabicEpisodes = /((?:更新至|全|第)\s*\d+\s*集)/; // Must end in 集
-            const regexChineseEpisodes = /((?:更新至|全|第)\s*[一二三四五六七八九十百千万亿]+\s*集)/; // Must end in 集
-            const regexEpNumbers = /((?:更至|更)\s*(?:EP)?\s*\d+)/; // EP numbering, no suffix needed
-
-            let episodeMatch = cleanedTitle.match(regexArabicEpisodes); // Try Arabic Episodes first
-            if (!episodeMatch) { // If Arabic Episodes fails, try Chinese Episodes
-                episodeMatch = cleanedTitle.match(regexChineseEpisodes);
-            }
-            if (!episodeMatch) { // If Chinese Episodes also fails, try EP Numbers
-                episodeMatch = cleanedTitle.match(regexEpNumbers);
-            }
-            const extractedEpisodeInfo = episodeMatch ? episodeMatch[0] : null;
-            // --- End extraction ---
-
-            // --- Adjust vod_name if episode info was extracted ---
-            if (extractedEpisodeInfo) {
-                video.vod_name = cleanedTitle.replace(extractedEpisodeInfo, '').trim();
-            }
-            // --- End Adjustment ---
-
-            // --- Build remark dynamically based on available info ---
-            const remarkParts = [];
-            if (providers.size > 0) {
-                remarkParts.push(Array.from(providers).join('/'));
-            }
-            // Only add channel name if in search context and it's not the default '未知频道'
-            if (isSearchContext && currentChannelName !== '未知频道') {
-                remarkParts.push(currentChannelName);
-            }
-            if (extractedEpisodeInfo) {
-                remarkParts.push(extractedEpisodeInfo);
-            }
-
-            if (remarkParts.length > 0) {
-                video.vod_remarks = remarkParts.join('|');
-            } else {
-                // Fallback to timestamp only if NO other info was available
-                video.vod_remarks = formattedDate;
-            }
-            // --- End building remark ---
-
-            // --- Only push video if it contains valid pan URLs ---
-            if (ids && ids.length > 0) { // Check if ids array is not empty
-                videoList.push(video);
-            }
-            // --- End check ---
-        }
-    } catch (error) {
-        
-    }
-    videoList.reverse()
-    if(nextPage?.length > 0) {
-     nextPage = `?${nextPage}`
-    }else{
-        nextPage = "0"
-    }
-    return {videoList, nextPage}
-}
-
-function _getAllPanUrls(html) {
-    const $ = cheerio.load(html)
-    const aList = $('a')
-    let results = []
-
-    for (let i = 0; i < aList.length; i++) {
-        const element = aList[i]
-        const href = $(element)?.attr('href') ?? ''
-        if (results.includes(href)) {
-            continue
-        }
-        // 如果 href 包含 panUrlsExt 中的某一个
-        for (let j = 0; j < panUrlsExt.length; j++) {
-            const element = panUrlsExt[j]
-            if (href.includes(element)) {
-                results.push(href)
-            }
-        }
-    }
-
-    return results
 }
 
 /**
@@ -365,6 +172,7 @@ function _getAllPanUrls(html) {
 async function getSubclassVideoList(args) {
     var backData = new RepVideoList()
     try {
+        // 纯搜索版本，不提供筛选功能
     } catch (error) {
         backData.error = error.toString()
     }
@@ -396,72 +204,309 @@ async function getVideoDetail(args) {
 async function getVideoPlayUrl(args) {
     var backData = new RepVideoPlayUrl()
     try {
+        // 纯搜索版本，不提供播放功能
     } catch (error) {
         backData.error = error.toString()
     }
     return JSON.stringify(backData)
 }
 
-const _searchListPageMap = {}
 /**
- * 搜索视频
+ * 解析频道配置，支持自定义搜索数量
+ * @param {string} webSite - 配置字符串
+ * @returns {Array} 频道配置数组
+ */
+function parseChannelConfig(webSite) {
+    const channels = []
+    const items = webSite.split('&')
+
+    for (const item of items) {
+        if (!item.trim()) continue
+
+        const parts = item.split('@')
+        if (parts.length < 2) continue
+
+        const channelName = parts[0].trim()
+        const channelIdAndCount = parts[1].trim()
+
+        // 检查是否有自定义数量 (使用 | 分隔符)
+        let channelId, count = 3 // 默认数量为3
+
+        if (channelIdAndCount.includes('|')) {
+            const idCountParts = channelIdAndCount.split('|')
+            channelId = idCountParts[0].trim()
+            const customCount = parseInt(idCountParts[1])
+            if (!isNaN(customCount) && customCount > 0) {
+                count = customCount
+            }
+        } else {
+            channelId = channelIdAndCount
+        }
+
+        channels.push({
+            name: channelName,
+            id: channelId,
+            count: count
+        })
+    }
+
+    return channels
+}
+
+/**
+ * 搜索视频 - 核心功能
  * @param {UZArgs} args
  * @returns {@Promise<JSON.stringify(new RepVideoList())>}
  */
 async function searchVideo(args) {
     var backData = new RepVideoList()
     try {
-        const channels = appConfig.webSite.split('&').map((item) => {
-            return item.split('@')[1]
+        // 获取环境变量中的API地址
+        var tgsApi = await getEnv(appConfig.uzTag, "TG搜API地址")
+        if (tgsApi && tgsApi.length > 0) {
+            appConfig.tgs = tgsApi
+        }
+
+        // 解析频道配置
+        const channels = parseChannelConfig(appConfig.webSite)
+
+        if (channels.length === 0) {
+            console.log('没有有效的频道配置')
+            return JSON.stringify(backData)
+        }
+
+        console.log('频道配置:', channels)
+
+        // 创建频道限制映射
+        const channelLimits = {}
+        channels.forEach(channel => {
+            channelLimits[channel.id] = channel.count
         })
-        for (let index = 0; index < channels.length; index++) {
-            const element = channels[index];
-            let endUrl = appConfig.tgs + element + "?q=" + args.searchWord
-        if(args.page == 1) {
-            _searchListPageMap[args.element] = ""
-        }else {
-            const nextPage = _searchListPageMap[element] ?? ""
-            if(nextPage.length == 0 || nextPage == "0") {
-                return JSON.stringify(backData)
+
+        // 为每个频道分别搜索
+        const allVideoLists = []
+
+        for (const channel of channels) {
+            try {
+                // 构建单个频道的搜索API请求URL
+                const searchUrl = `${appConfig.tgs}?pic=false&count=${channel.count}&channelUsername=${encodeURIComponent(channel.id)}&keyword=${encodeURIComponent(args.searchWord)}`
+
+                console.log(`搜索频道 ${channel.name}(${channel.id}) 数量:${channel.count}`)
+                console.log('搜索URL:', searchUrl)
+
+                // 调用TG搜索API
+                const res = await req(searchUrl)
+
+                if (res.data && res.data.results) {
+                    // 解析API返回的数据，传递频道限制
+                    const videoList = parseAPIResults(res.data.results, args.searchWord, channelLimits)
+                    allVideoLists.push(...videoList)
+                }
+
+                // 添加小延迟避免请求过快
+                await new Promise(resolve => setTimeout(resolve, 100))
+
+            } catch (channelError) {
+                console.error(`频道 ${channel.name} 搜索失败:`, channelError)
+                // 继续处理其他频道
             }
-            endUrl += nextPage
         }
-        const res = await getTGList(endUrl, true)
-        // Deduplicate the results for the current page of this channel
-        const deduplicatedPageVideos = deduplicateVideoListByLinks(res.videoList);
-        backData.data.push(...deduplicatedPageVideos); // Add deduplicated results
-        _searchListPageMap[element] = res.nextPage
-        }
-        
+
+        // 合并所有结果并去重
+        backData.data = deduplicateVideoListByLinks(allVideoLists)
+
+        console.log(`总共获取到 ${backData.data.length} 个去重后的结果`)
+
     } catch (error) {
+        console.error('搜索错误:', error)
         backData.error = error.toString()
     }
     return JSON.stringify(backData)
 }
 
-// --- Deduplication Function ---
-function deduplicateVideoListByLinks(videoList) {
-    const map = new Map();
-    for (const video of videoList) {
-        let ids;
-        try {
-            // video.vod_id is a stringified array, parse it back
-            ids = JSON.parse(video.vod_id || '[]');
-            if (!Array.isArray(ids)) {
-                ids = []; // Ensure it's an array
-            }
-        } catch (e) {
-            ids = []; // Handle parsing errors
+/**
+ * 解析TG搜索API返回的结果
+ * @param {Array} results - API返回的results数组
+ * @param {string} searchWord - 搜索关键词
+ * @param {Object} channelLimits - 频道限制映射 {channelId: count}
+ * @returns {Array} 视频列表
+ */
+function parseAPIResults(results, searchWord, channelLimits = {}) {
+    const videoList = []
+
+    // 创建频道名称映射 - 使用新的解析逻辑
+    const channelMap = new Map()
+    const channels = parseChannelConfig(appConfig.webSite)
+    channels.forEach(channel => {
+        channelMap.set(channel.id, channel.name) // 键: id, 值: name
+    })
+
+    for (const result of results) {
+        if (!result || typeof result !== 'string') continue
+
+        // 解析格式: "频道名$$$链接1$$标题1##链接2$$标题2##..."
+        const parts = result.split('$$$')
+        if (parts.length !== 2) continue
+
+        const channelName = parts[0]
+        const contentStr = parts[1]
+
+        if (!contentStr) continue
+
+        // 解析内容项: "链接1$$标题1##链接2$$标题2##..."
+        let items = contentStr.split('##')
+
+        // 根据频道限制截取结果数量
+        const channelId = Object.keys(channelLimits).find(id =>
+            channelName.includes(id) || id === channelName
+        )
+        if (channelId && channelLimits[channelId]) {
+            items = items.slice(0, channelLimits[channelId])
+            console.log(`频道 ${channelName} 限制为 ${channelLimits[channelId]} 个结果，实际处理 ${items.length} 个`)
         }
 
-        // Create a stable key by sorting the IDs before stringifying
-        const key = JSON.stringify(ids.sort());
+        for (const item of items) {
+            if (!item.trim()) continue
 
-        // If the key doesn't exist, or if the current video's message_id is greater
-        if (!map.has(key) || (video.message_id > (map.get(key)?.message_id || 0))) {
-            map.set(key, video);
+            const itemParts = item.split('$$')
+            let link = itemParts[0]?.trim()
+            let title = itemParts[1]?.trim()
+
+            // 如果没有标题，使用搜索关键词
+            if (!title) {
+                title = searchWord
+            }
+
+            // 验证是否为有效的网盘链接
+            if (!link || !isValidPanUrl(link)) continue
+
+            // 创建视频对象
+            const video = new VideoDetail()
+            video.vod_id = JSON.stringify([link])
+            video.vod_name = cleanTitle(title)
+
+            // 识别网盘提供商
+            const providers = identifyProviders([link])
+
+            // 提取剧集信息
+            const episodeInfo = extractEpisodeInfo(title)
+            if (episodeInfo) {
+                video.vod_name = title.replace(episodeInfo, '').trim()
+            }
+
+            // 构建备注
+            const remarkParts = []
+            if (providers.length > 0) {
+                remarkParts.push(providers.join('/'))
+            }
+            if (channelName && channelName !== '未知频道') {
+                remarkParts.push(channelName)
+            }
+            if (episodeInfo) {
+                remarkParts.push(episodeInfo)
+            }
+
+            video.vod_remarks = remarkParts.length > 0 ? remarkParts.join('|') : '资源'
+
+            // 设置默认图片
+            video.vod_pic = ''
+
+            videoList.push(video)
         }
     }
-    return Array.from(map.values());
+
+    return videoList
 }
-// --- End Deduplication Function ---
+
+/**
+ * 验证是否为有效的网盘URL
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isValidPanUrl(url) {
+    if (!url || typeof url !== 'string') return false
+
+    for (const domain of panUrlsExt) {
+        if (url.includes(domain)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * 识别网盘提供商
+ * @param {Array} urls
+ * @returns {Array} 提供商名称数组
+ */
+function identifyProviders(urls) {
+    const providers = new Set()
+
+    for (const url of urls) {
+        for (const provider of providerRegexMap) {
+            if (provider.regex.test(url)) {
+                providers.add(provider.name)
+                break
+            }
+        }
+    }
+
+    return Array.from(providers)
+}
+
+/**
+ * 清理标题
+ * @param {string} title
+ * @returns {string}
+ */
+function cleanTitle(title) {
+    if (!title) return ''
+
+    return title
+        .replace(/^(名称[：:])/, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+}
+
+/**
+ * 提取剧集信息
+ * @param {string} title
+ * @returns {string|null}
+ */
+function extractEpisodeInfo(title) {
+    if (!title) return null
+
+    const match = title.match(EPISODE_COMBINED_REGEX)
+    return match ? match[0] : null
+}
+
+/**
+ * 去重函数 - 基于链接去重
+ * @param {Array} videoList
+ * @returns {Array}
+ */
+function deduplicateVideoListByLinks(videoList) {
+    const map = new Map()
+
+    for (const video of videoList) {
+        let ids
+        try {
+            ids = JSON.parse(video.vod_id || '[]')
+            if (!Array.isArray(ids)) {
+                ids = []
+            }
+        } catch (e) {
+            ids = []
+        }
+
+        // 通过排序后的链接创建唯一键
+        const key = JSON.stringify(ids.sort())
+
+        // 如果键不存在，添加到map中
+        if (!map.has(key)) {
+            map.set(key, video)
+        }
+    }
+
+    return Array.from(map.values())
+}
