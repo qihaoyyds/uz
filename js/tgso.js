@@ -6,6 +6,7 @@
 //@order: B
 
 // ignore
+// 
 import {
     FilterLabel,
     FilterTitle,
@@ -43,12 +44,7 @@ import {
     formatBackData,
 } from '../../core/core/uzUtils.js'
 
-import {
-    cheerio,
-    Crypto,
-    Encrypt,
-    JSONbig
-} from '../../core/core/uz3lib.js'
+import { cheerio, Crypto, Encrypt, JSONbig } from '../../core/core/uz3lib.js'
 // ignore
 
 const appConfig = {
