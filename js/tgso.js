@@ -4,6 +4,8 @@
 //@env:TG搜API地址##https://tgsou.252035.xyz
 //@remark:免代理纯搜索无图片，格式 频道名称@频道id|搜索数量&频道名称@频道id，支持自定义每频道搜索数量，默认3个，支持5种网盘：天翼/夸克/UC/阿里/123
 //@order: B
+
+// ignore
 import {
     FilterLabel,
     FilterTitle,
@@ -41,7 +43,12 @@ import {
     formatBackData,
 } from '../../core/core/uzUtils.js'
 
-import { cheerio, Crypto, Encrypt, JSONbig } from '../../core/core/uz3lib.js'
+import {
+    cheerio,
+    Crypto,
+    Encrypt,
+    JSONbig
+} from '../../core/core/uz3lib.js'
 // ignore
 
 const appConfig = {
