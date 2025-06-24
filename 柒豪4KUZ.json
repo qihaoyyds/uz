@@ -5,14 +5,14 @@
             "version": 22,
             "remark": "柒豪网盘解析",
             "env": "UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/panTools2.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/panTools2.js",
             "type": 300
         }
     ],
     "danMu": [
         {
             "name": "弹幕",
-            "url": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/danMu2.txt",
+            "url": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/danMu2.txt",
             "codeID": "4Y6DDMATfbw0Rg0Y2AOGpfmpU2cgspFf",
             "order": "A01",
             "env": "弹幕解析地址##内置 4 条线路。格式 地址1;地址2",
@@ -21,11 +21,19 @@
             "type": 400
         }
     ],
+    "live": [
+        {
+            "name": "直播",
+            "api": "http://38.165.20.168/js/直播.js",
+            "type": 10,
+            "remark": "Q群511873584 「柒豪」维护"
+        }
+    ],
     "vod": [
         {
             "name": "玩偶 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/wanou.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/wanou.js",
             "webSite": "http://wogg.xxooo.cf",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -34,7 +42,7 @@
         {
             "name": "木偶 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/muou.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/muou.js",
             "webSite": "https://666.666291.xyz/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -43,7 +51,7 @@
         {
             "name": "多多 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/duoduo.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/duoduo.js",
             "webSite": "https://tv.yydsys.cc",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -52,7 +60,7 @@
         {
             "name": "蜡笔 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/labi.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/labi.js",
             "webSite": "https://feimaoai.site",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -61,7 +69,7 @@
         {
             "name": "闪电 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/shandian.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/shandian.js",
             "webSite": "http://1.95.79.193/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -70,7 +78,7 @@
         {
             "name": "至臻 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/zhizhen.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/zhizhen.js",
             "webSite": "https://xiaomiai.site/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -79,7 +87,7 @@
         {
             "name": "欧歌 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/ouge.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/ouge.js",
             "webSite": "https://woog.nxog.eu.org/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -88,7 +96,7 @@
         {
             "name": "下饭 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/xiafan.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/xiafan.js",
             "webSite": "http://154.204.177.231",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -97,7 +105,7 @@
         {
             "name": "二小 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/erxiao.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/erxiao.js",
             "webSite": "https://xhww.net/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -106,7 +114,7 @@
         {
             "name": "奥秘 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/aomi.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/aomi.js",
             "webSite": "https://vip.omii.top",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -115,7 +123,7 @@
         {
             "name": "虎斑 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/huban.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/huban.js",
             "webSite": "http://103.45.162.207:20720/",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
@@ -124,7 +132,7 @@
         {
             "name": "雷鲸 | 4K",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/leijing.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/leijing.js",
             "codeID": "GgryhjYVgQMDUw4f",
             "instance": "leiJing20241126",
             "webSite": "https://www.leijing.xyz",
@@ -135,7 +143,7 @@
         {
             "name": "天翼 | 搜索",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tianyi.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tianyi.js",
             "codeID": "DU9z425w42hk9B8l",
             "instance": "tianyiso20241129",
             "webSite": "https://www.tianyiso.com",
@@ -146,7 +154,7 @@
         {
             "name": "趣盘 | 搜索",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/qupan.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/qupan.js",
             "codeID": "LO5aQSJYBZLrRD1g",
             "instance": "funletu20241124",
             "webSite": "https://pan.funletu.com",
@@ -162,7 +170,7 @@
             "codeID": "UM9WK6x3sPm3mbUgJB2dJNs59vTyNynm",
             "instance": "leiJing20241126",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/pansearch.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/pansearch.js",
             "type": 101
         },
         {
@@ -172,7 +180,7 @@
             "env": "TG搜API地址##https://tgsou.252035.xyz",
             "webSite": "123资源@zyfb123|2&夸克UC@ucquark|5&夸克电影@alyp_4K_Movies&夸克剧集@alyp_TV&夸克动漫@alyp_Animation&鱼哥资源@yggpan&CH资源@ChangAn2504",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tgso.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tgso.js",
             "type": 101
         },
         {
@@ -181,7 +189,7 @@
             "remark": "Q群511873584 「柒豪」维护",
             "webSite": "https://www.nanf.cc",
             "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
+            "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
             "type": 101
         }
     ]
