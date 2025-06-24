@@ -21,14 +21,6 @@
             "type": 400
         }
     ],
-    "live": [
-        {
-            "name": "直播",
-            "api": "http://38.165.20.168/js/直播.txt",
-            "type": 10,
-            "remark": "Q群511873584 「柒豪」维护"
-        }
-    ],
     "vod": [
         {
             "name": "玩偶 | 4K",
@@ -191,6 +183,14 @@
             "order": "B",
             "api": "https://github.moeyy.xyz/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
             "type": 101
+        }
+    ],
+    "live": [
+        {
+            "name": "直播",
+            "api": "http://38.165.20.168/js/直播.txt",
+            "type": 10,
+            "remark": "Q群511873584 「柒豪」维护"
         }
     ]
 }
