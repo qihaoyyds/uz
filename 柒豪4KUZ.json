@@ -133,6 +133,16 @@
             "type": 100
         },
         {
+            "name": "校长 | 4K",
+            "version": 1,
+            "remark": "Q群511873584 「柒豪」维护！",
+            "webSite": "https://xzys.fun",
+            "codeID": "7T4PFJobJZegoH1hLUyEL1HOGSoNuwR6",
+            "order": "B",
+            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/jiaozhang.js",
+            "type": 101
+        },
+        {
             "name": "天翼 | 搜索",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/tianyi.js",
