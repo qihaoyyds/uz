@@ -1,11 +1,11 @@
 // ignore
 //@version:1
-//@webSite:http://xsayang.fun:12512
+//@webSite:http://103.45.162.207:20720
 //@remark:
 //@order: B
 // ignore
 const appConfig = {
-    _webSite: 'http://xsayang.fun:12512',
+    _webSite: 'http://103.45.162.207:20720',
     /**
      * 网站主页，uz 调用每个函数前都会进行赋值操作
      * 如果不想被改变 请自定义一个变量
