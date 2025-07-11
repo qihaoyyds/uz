@@ -39,27 +39,27 @@ async function getClassList(args) {
     var backData = new RepVideoClassList()
     backData.data = [{
             type_id: '30',
-            type_name: '奥秘电影',
+            type_name: '电影',
             hasSubclass: false,
         },
         {
             type_id: '31',
-            type_name: '奥秘剧集',
+            type_name: '剧集',
             hasSubclass: false,
         },
         {
             type_id: '32',
-            type_name: '奥秘动漫',
+            type_name: '动漫',
             hasSubclass: false,
         },
         {
             type_id: '33',
-            type_name: '奥秘综艺',
+            type_name: '综艺',
             hasSubclass: false,
         },
         {
             type_id: '34',
-            type_name: '奥秘短剧',
+            type_name: '短剧',
             hasSubclass: false,
         },
     ]

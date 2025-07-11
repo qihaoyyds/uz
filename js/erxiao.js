@@ -40,22 +40,22 @@ async function getClassList(args) {
     backData.data = [
         {
             type_id: '1',
-            type_name: '二小电影',
+            type_name: '电影',
             hasSubclass: false,
         },
         {
             type_id: '2',
-            type_name: '二小剧集',
+            type_name: '剧集',
             hasSubclass: false,
         },
         {
             type_id: '3',
-            type_name: '二小动漫',
+            type_name: '动漫',
             hasSubclass: false,
         },
         {
             type_id: '17',
-            type_name: '二小综艺',
+            type_name: '综艺',
             hasSubclass: false,
         },
     ]

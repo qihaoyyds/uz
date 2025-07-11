@@ -40,37 +40,37 @@ async function getClassList(args) {
     backData.data = [
         {
             type_id: '1',
-            type_name: '多多电影',
+            type_name: '电影',
             hasSubclass: false,
         },
         {
             type_id: '2',
-            type_name: '多多剧集',
+            type_name: '剧集',
             hasSubclass: false,
         },
         {
             type_id: '5',
-            type_name: '多多短剧',
+            type_name: '短剧',
             hasSubclass: false,
         },
         {
             type_id: '4',
-            type_name: '多多动漫',
+            type_name: '动漫',
             hasSubclass: false,
         },
         {
             type_id: '3',
-            type_name: '多多综艺',
+            type_name: '综艺',
             hasSubclass: false,
         },
         {
             type_id: '20',
-            type_name: '多多纪录片',
+            type_name: '纪录片',
             hasSubclass: false,
         },
         {
             type_id: '5',
-            type_name: '多多短剧',
+            type_name: '短剧',
             hasSubclass: false,
         },
     ]

@@ -39,22 +39,22 @@ async function getClassList(args) {
     var backData = new RepVideoClassList()
     backData.data = [{
             type_id: '1',
-            type_name: '玩偶电影',
+            type_name: '电影',
             hasSubclass: false,
         },
         {
             type_id: '2',
-            type_name: '玩偶剧集',
+            type_name: '剧集',
             hasSubclass: false,
         },
         {
             type_id: '3',
-            type_name: '玩偶动漫',
+            type_name: '动漫',
             hasSubclass: false,
         },
         {
             type_id: '4',
-            type_name: '玩偶综艺',
+            type_name: '综艺',
             hasSubclass: false,
         },
         {
@@ -64,7 +64,7 @@ async function getClassList(args) {
         },
         {
             type_id: '6',
-            type_name: '玩偶短剧',
+            type_name: '短剧',
             hasSubclass: false,
         },
     ]
