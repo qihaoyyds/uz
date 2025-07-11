@@ -5,7 +5,7 @@
 //@order: B
 // ignore
 const appConfig = {
-    _webSite: 'http://wogg.xxooo.cf',
+    _webSite: 'https://wogg.333232.xyz',
     /**
      * 网站主页，uz 调用每个函数前都会进行赋值操作
      * 如果不想被改变 请自定义一个变量
