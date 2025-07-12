@@ -59,6 +59,11 @@ const PanType = {
     UC: 'UC',
 
     /**
+     * 阿里
+     **/
+    Ali: '阿里',
+
+    /**
      * 123网盘
      **/
     Pan123: '123网盘',
@@ -67,6 +72,11 @@ const PanType = {
      * 天翼网盘
      */
     Pan189: '天翼网盘',
+
+    /**
+     *  解析
+     */
+    JieXi: '采集解析',
 }
 
 /**
@@ -2802,7 +2812,7 @@ class PanTools {
             const data = await this.pan123.getPlayUrl(item.data)
             return JSON.stringify(data)
         } else if (item.panType === PanType.Pan189) {
-            const data = await this.pan189.getPlayUrl(item.data)           
+            const data = await this.pan189.getPlayUrl(item.data)
             return JSON.stringify(data)
         }
 
