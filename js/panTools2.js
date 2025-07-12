@@ -1972,7 +1972,6 @@ class PanTools {
 
         this.quark = new QuarkUC(true)
         this.uc = new QuarkUC(false)
-        this.ali = new Ali()
         this.pan123 = new Pan123()
         this.pan189 = new Pan189()
         this.jieXi = new JieXi()
