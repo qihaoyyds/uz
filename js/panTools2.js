@@ -2122,17 +2122,8 @@ class PanTools {
     async updateQuarkUCCookie(panType, cookie) {
         await this.setPanEnv(panType + 'Cookie', cookie)
     }
-
-    /**
-     * 统一获取环境变量
-     * @param {string} envKey
-     * @returns
-     */
-    async getPanEnv(envKey) {
-        const env = await getEnv(this.uzTag, envKey)
-        return env
-    }
-
+    
+    
     /**
      * 统一设置环境变量
      * @param {string} envKey
