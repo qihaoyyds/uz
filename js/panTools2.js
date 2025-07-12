@@ -2156,9 +2156,6 @@ class PanTools {
         const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
         this.uc.cookie = ucCookie
 
-        const aliCookie = (await this.getAliDataEnv(PanType.Ali)) ?? ''
-        this.ali.token = aliCookie
-
         this.pan123.passport =
             (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
         this.pan123.password =
@@ -2183,7 +2180,6 @@ class PanTools {
         //MARK: 2. 请补充自定义转存文件夹名称
         this.quark.saveDirName = dirName
         this.uc.saveDirName = dirName
-        this.ali.saveDirName = dirName
     }
 
     /**
@@ -2193,7 +2189,6 @@ class PanTools {
         //MARK: 3. 请实现清理转存文件夹
         await this.quark.clearSaveDir()
         await this.uc.clearSaveDir()
-        await this.ali.clearSaveDir()
     }
 
     /**
