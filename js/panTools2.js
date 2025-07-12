@@ -40,12 +40,7 @@ import {
     formatBackData,
 } from '../../core/core/uzUtils.js'
 
-import {
-    cheerio,
-    Crypto,
-    Encrypt,
-    JSONbig
-} from '../../core/core/uz3lib.js'
+import { cheerio, Crypto, Encrypt, JSONbig } from '../../core/core/uz3lib.js'
 // ignore
 
 /**
@@ -72,6 +67,11 @@ const PanType = {
      * 天翼网盘
      */
     Pan189: '天翼网盘',
+
+    /**
+     *  解析
+     */
+    JieXi: '采集解析',
 }
 
 /**
@@ -245,7 +245,8 @@ class QuarkClient {
     static apiUrl = 'https://drive-pc.quark.cn/1/clouddrive/'
     static pr = 'pr=ucpro&fr=pc'
     static httpHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) quark-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) quark-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
         Referer: 'https://pan.quark.cn/',
         'Content-Type': 'application/json',
     }
@@ -257,7 +258,8 @@ class UCClient {
 
     static pr = 'pr=UCBrowser&fr=pc&sys=darwin&ve=1.8.6&ut=' + kUC_UTKeyWord
     static httpHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
         Referer: 'https://drive.uc.cn',
         'Content-Type': 'application/json',
     }
@@ -272,7 +274,7 @@ class QuarkUC {
         this.saveDirId = null
         this.saveDirName = 'uz影视'
         this.isVip = false
-        this.updateCookie = function() {}
+        this.updateCookie = function () { }
     }
     uzTag = ''
     ut = ''
@@ -299,9 +301,9 @@ class QuarkUC {
         }
     }
     get headers() {
-        const headers = this.isQuark ?
-            QuarkClient.httpHeaders :
-            UCClient.httpHeaders
+        const headers = this.isQuark
+            ? QuarkClient.httpHeaders
+            : UCClient.httpHeaders
         headers['Cookie'] = this.cookie
         return headers
     }
@@ -328,12 +330,12 @@ class QuarkUC {
 
         return {
             cookie: cookie,
-            Referer: this.isQuark ?
-                'https://pan.quark.cn/' :
-                'https://drive.uc.cn/',
-            'User-Agent': this.isQuark ?
-                '' :
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
+            Referer: this.isQuark
+                ? 'https://pan.quark.cn/'
+                : 'https://drive.uc.cn/',
+            'User-Agent': this.isQuark
+                ? ''
+                : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
         }
     }
     fileName = ''
@@ -421,13 +423,7 @@ class QuarkUC {
         let playData = new PanPlayInfo()
 
         try {
-            const {
-                flag,
-                shareId,
-                shareToken,
-                fileId,
-                shareFileToken
-            } = arg
+            const { flag, shareId, shareToken, fileId, shareFileToken } = arg
 
             const saveFileId = await this.save({
                 shareId,
@@ -444,9 +440,7 @@ class QuarkUC {
             }
             this.saveFileIdCaches[fileId] = saveFileId
 
-            let urls = await this.getVideoPlayUrl({
-                fileId: fileId
-            })
+            let urls = await this.getVideoPlayUrl({ fileId: fileId })
             playData.urls = urls
             playData.urls.sort((a, b) => {
                 return b.priority - a.priority
@@ -460,10 +454,7 @@ class QuarkUC {
         return playData
     }
 
-    async getVideoPlayUrl({
-        fileId,
-        isMount = false
-    }) {
+    async getVideoPlayUrl({ fileId, isMount = false }) {
         let rawUrls = await this.getDownload({
             fileId: fileId,
             isMount: isMount,
@@ -528,7 +519,7 @@ class QuarkUC {
                     }
                 }
                 return resp
-            } catch (e) {}
+            } catch (e) { }
             leftRetry--
             await new Promise((resolve) => setTimeout(resolve, 1000))
         }
@@ -547,10 +538,7 @@ class QuarkUC {
         }
         const matches = regex.exec(url)
         if (matches != null) {
-            return {
-                shareId: matches[1],
-                folderId: '0'
-            }
+            return { shareId: matches[1], folderId: '0' }
         }
         return null
     }
@@ -562,7 +550,8 @@ class QuarkUC {
         if (!this.shareTokenCache.hasOwnProperty(shareData.shareId)) {
             delete this.shareTokenCache[shareData.shareId]
             const shareToken = await this.api(
-                `share/sharepage/token?${this.pr}`, {
+                `share/sharepage/token?${this.pr}`,
+                {
                     pwd_id: shareData.shareId,
                     passcode: shareData.sharePwd || '',
                 }
@@ -674,10 +663,7 @@ class QuarkUC {
         let bestMatchIndex = 0
         for (let i = 0; i < targetItems.length; i++) {
             const currentLCS = UZUtils.lcs(mainItem.name, targetItems[i].name)
-            results.push({
-                target: targetItems[i],
-                lcs: currentLCS
-            })
+            results.push({ target: targetItems[i], lcs: currentLCS })
             if (currentLCS.length > results[bestMatchIndex].lcs.length) {
                 bestMatchIndex = i
             }
@@ -757,19 +743,11 @@ class QuarkUC {
      * @param {boolean} [args.clean=false] 是否清理已存在的保存目录
      * @returns {Promise<string|null>} 返回保存成功的文件ID，失败返回null
      */
-    async save({
-        shareId,
-        stoken,
-        fileId,
-        fileToken,
-        clean = false
-    }) {
+    async save({ shareId, stoken, fileId, fileToken, clean = false }) {
         await this.createSaveDir()
         if (this.saveDirId == null) return null
         if (stoken == null) {
-            await this.getShareToken({
-                shareId
-            })
+            await this.getShareToken({ shareId })
             if (!this.shareTokenCache.hasOwnProperty(shareId)) return null
         }
         const saveResult = await this.api(`share/sharepage/save?${this.pr}`, {
@@ -813,10 +791,7 @@ class QuarkUC {
      * @param {number} param0.page - 页码
      * @returns {Promise<[PanMountListData]>}
      */
-    async getFileList({
-        pdir_fid,
-        page
-    }) {
+    async getFileList({ pdir_fid, page }) {
         try {
             pdir_fid = pdir_fid || '0'
             page = page || 1
@@ -861,7 +836,7 @@ class QuarkUC {
                 })
             }
             return mountList
-        } catch (e) {}
+        } catch (e) { }
         return []
     }
 
@@ -926,10 +901,11 @@ class QuarkUC {
         let isMount = args.isMount ?? false
         try {
             const down = await this.api(
-                `file/download?${this.pr}&uc_param_str=`, {
-                    fids: isMount ?
-                        [args.fileId] :
-                        [this.saveFileIdCaches[args.fileId]],
+                `file/download?${this.pr}&uc_param_str=`,
+                {
+                    fids: isMount
+                        ? [args.fileId]
+                        : [this.saveFileIdCaches[args.fileId]],
                 }
             )
             if (
@@ -941,14 +917,16 @@ class QuarkUC {
                 if (this.isQuark && down.data[0].video_width > 2000) {
                     priority = 0
                 }
-                return [{
-                    name: '原画',
-                    url: down.data[0].download_url,
-                    headers: this.playHeaders,
-                    priority: priority,
-                }, ]
+                return [
+                    {
+                        name: '原画',
+                        url: down.data[0].download_url,
+                        headers: this.playHeaders,
+                        priority: priority,
+                    },
+                ]
             }
-        } catch (error) {}
+        } catch (error) { }
         return []
     }
 }
@@ -971,8 +949,10 @@ class Pan123 {
 
     async init() {
         try {
-            if (this.passport.length > 0) {}
-            if (this.password.length > 0) {}
+            if (this.passport.length > 0) {
+            }
+            if (this.password.length > 0) {
+            }
             const auth = await UZUtils.getStorage({
                 key: this.authKey,
                 uzTag: this.uzTag,
@@ -992,7 +972,7 @@ class Pan123 {
             } else {
                 await this.loin()
             }
-        } catch (error) {}
+        } catch (error) { }
     }
 
     async loin() {
@@ -1005,10 +985,12 @@ class Pan123 {
             method: 'POST',
             url: this.loginUrl,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                 'Content-Type': 'application/json',
                 'App-Version': '43',
-                Referer: 'https://login.123pan.com/centerlogin?redirect_url=https%3A%2F%2Fwww.123684.com&source_page=website',
+                Referer:
+                    'https://login.123pan.com/centerlogin?redirect_url=https%3A%2F%2Fwww.123684.com&source_page=website',
             },
             data: data,
         }
@@ -1149,7 +1131,8 @@ class Pan123 {
             },
         })
         if (list.status === 200) {
-            if (list.data.code === 5103) {} else {
+            if (list.data.code === 5103) {
+            } else {
                 let info = list.data.data
                 if (info == null) {
                     return []
@@ -1173,7 +1156,8 @@ class Pan123 {
                 })
                 let result = await Promise.all(
                     cate.map(async (it) =>
-                        this.getShareInfo(shareKey, SharePwd, next, it.fileId))
+                        this.getShareInfo(shareKey, SharePwd, next, it.fileId)
+                    )
                 )
                 result = result.filter(
                     (item) => item !== undefined && item !== null
@@ -1234,7 +1218,8 @@ class Pan123 {
                 method: 'POST',
                 url: `${this.api}download/info`,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'User-Agent':
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                     Authorization: `Bearer ${this.auth}`,
                     'Content-Type': 'application/json;charset=UTF-8',
                     platform: 'android',
@@ -1253,12 +1238,14 @@ class Pan123 {
             const query = qs.toObject(url.split('?')[1])
 
             url = base64Decode(query.params)
-            return [{
-                url: url,
-                name: '原画',
-                priority: 9999,
-                headers: {},
-            }, ]
+            return [
+                {
+                    url: url,
+                    name: '原画',
+                    priority: 9999,
+                    headers: {},
+                },
+            ]
         } catch (error) {
             return []
         }
@@ -1271,7 +1258,8 @@ class Pan123 {
                 method: 'GET',
                 url: `https://www.123684.com/b/api/video/play/info`,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'User-Agent':
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                     Authorization: `Bearer ${this.auth}`,
                     'Content-Type': 'application/json;charset=UTF-8',
                     platform: 'android',
@@ -1347,7 +1335,8 @@ class Pan189 {
         }
         this.loginHeaders = {
             'User-Agent': `Mozilla/5.0 (Linux; U; Android 11; ${this.config.model} Build/RP1A.201005.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile Safari/537.36 Ecloud/${this.config.version} Android/30 clientId/${this.config.clientId} clientModel/${this.config.model} clientChannelId/qq proVersion/1.0.6`,
-            Referer: 'https://m.cloud.189.cn/zhuanti/2016/sign/index.jsp?albumBackupOpened=1',
+            Referer:
+                'https://m.cloud.189.cn/zhuanti/2016/sign/index.jsp?albumBackupOpened=1',
             // 'Accept-Encoding': 'gzip, deflate',
         }
 
@@ -1372,7 +1361,8 @@ class Pan189 {
     cookie = ''
     authKey = '189panAuth'
     normalHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         Accept: 'application/json;charset=UTF-8',
     }
 
@@ -1402,20 +1392,17 @@ class Pan189 {
             let tHeaders = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json;charset=UTF-8',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/76.0',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/76.0',
                 Referer: 'https://open.e.189.cn/',
                 Lt,
                 Reqid,
             }
-            let data = {
-                version: '2.0',
-                appKey: 'cloud'
-            }
+            let data = { version: '2.0', appKey: 'cloud' }
             resp = await axios.post(
                 'https://open.e.189.cn/api/logbox/oauth2/appConf.do',
-                qs.stringify(data), {
-                    headers: tHeaders
-                }
+                qs.stringify(data),
+                { headers: tHeaders }
             )
             let returnUrl = resp.data.data.returnUrl
             let paramId = resp.data.data.paramId
@@ -1451,7 +1438,8 @@ class Pan189 {
             }
             resp = await axios.post(
                 'https://open.e.189.cn/api/logbox/oauth2/loginSubmit.do',
-                qs.stringify(data), {
+                qs.stringify(data),
+                {
                     headers: tHeaders,
                     validateStatus: null,
                 }
@@ -1464,10 +1452,7 @@ class Pan189 {
                     .join(';')
 
                 this.cookie = cookies
-                const headers = {
-                    ...this.loginHeaders,
-                    Cookie: cookies
-                }
+                const headers = { ...this.loginHeaders, Cookie: cookies }
 
                 resp = await axios.get(loginJsonData.toUrl, {
                     headers: headers,
@@ -1476,9 +1461,9 @@ class Pan189 {
 
                 cookies +=
                     '; ' +
-                    resp.headers?.['set-cookie']
-                    ?.map((it) => it.split(';')[0])
-                    .join(';') ?? ''
+                        resp.headers?.['set-cookie']
+                            ?.map((it) => it.split(';')[0])
+                            .join(';') ?? ''
                 this.cookie = cookies
 
                 await UZUtils.setStorage({
@@ -1525,7 +1510,7 @@ class Pan189 {
             if (accessCode) {
                 this.accessCode = accessCode
             }
-        } catch (error) {}
+        } catch (error) { }
     }
 
     fileName = ''
@@ -1612,7 +1597,8 @@ class Pan189 {
             }
             if (accessCode) {
                 let check = await axios.get(
-                    `${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`, {
+                    `${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`,
+                    {
                         headers: this.normalHeaders,
                     }
                 )
@@ -1620,7 +1606,8 @@ class Pan189 {
                     this.shareId = check.data.shareId
                 }
                 let resp = await axios.get(
-                    `${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`, {
+                    `${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`,
+                    {
                         headers: this.normalHeaders,
                     }
                 )
@@ -1696,7 +1683,7 @@ class Pan189 {
                 )
                 return [...videos, ...result.flat()]
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async getShareFile(fileId, pageNum = 1, retry = 0) {
@@ -1704,7 +1691,7 @@ class Pan189 {
             if (!fileId || retry > 3) {
                 return null
             }
-
+            
             const options = {
                 method: 'GET',
                 headers: this.normalHeaders,
@@ -1754,7 +1741,7 @@ class Pan189 {
                 }
             }
             return videos
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async getPlayUrl(data) {
@@ -1784,9 +1771,7 @@ class Pan189 {
     }
 
     async getShareUrl(fileId, shareId) {
-        let headers = {
-            ...this.normalHeaders
-        }
+        let headers = { ...this.normalHeaders }
         if (
             this.cookie.length < 1 &&
             this.account.length > 0 &&
@@ -1799,7 +1784,8 @@ class Pan189 {
 
         try {
             let resp = await axios.get(
-                `${this.api}/portal/getNewVlcVideoPlayUrl.action?shareId=${shareId}&dt=1&fileId=${fileId}&type=4&key=noCache`, {
+                `${this.api}/portal/getNewVlcVideoPlayUrl.action?shareId=${shareId}&dt=1&fileId=${fileId}&type=4&key=noCache`,
+                {
                     headers: headers,
                 }
             )
@@ -1849,7 +1835,132 @@ class Pan189 {
     }
 }
 
+// 解析
+class JieXi {
+    uzTag = ''
 
+    static isJieXiUrl(url) {
+        return (
+            url.includes('v.qq.com') ||
+            url.includes('iqiyi.com') ||
+            url.includes('youku.com') ||
+            url.includes('mgtv.com') ||
+            url.includes('bilibili.com')
+        )
+    }
+
+    getTypeName(url) {
+        if (url.includes('v.qq.com')) {
+            return 'TX'
+        } else if (url.includes('iqiyi.com')) {
+            return 'IQY'
+        } else if (url.includes('youku.com')) {
+            return 'YK'
+        } else if (url.includes('mgtv.com')) {
+            return 'MGTV'
+        } else if (url.includes('bilibili.com')) {
+            return 'Bili'
+        } else {
+            return '未知'
+        }
+    }
+
+    async getVideoList(url) {
+        // 第一集$第一集的视频详情链接#第二集$第二集的视频详情链接$$$第一集$第一集的视频详情链接#第二集$第二集的视频详情链接
+        let list = url.split('$$$')
+        let videos = []
+        for (let i = 0; i < list.length; i++) {
+            const oneFrom = list[i]
+            const fromName = this.getTypeName(oneFrom)
+            let videoList = oneFrom.split('#')
+
+            for (let j = 0; j < videoList.length; j++) {
+                const element = videoList[j]
+                let video = element.split('$')
+                if (video.length === 2) {
+                    let title = video[0]
+                    let url = video[1]
+                    videos.push({
+                        name: title,
+                        fromName: fromName,
+                        panType: PanType.JieXi,
+                        data: {
+                            url: url,
+                        },
+                    })
+                } else if (video[0] === url) {
+                    videos.push({
+                        name: '解析',
+                        fromName: fromName,
+                        panType: PanType.JieXi,
+                        data: {
+                            url: url,
+                        },
+                    })
+                }
+            }
+        }
+
+        return {
+            videos: videos,
+            //TODO: 推送只有一个链接的 获取视频名称 给 fileName
+            fileName: this.fileName,
+            error: '',
+        }
+    }
+
+    async getPlayUrl(data) {
+        let url = data.url
+        // 格式：名称1@地址1;名称2@地址2
+        let allUrls = await getEnv(this.uzTag, '采集解析地址')
+        if (allUrls.length < 1) {
+            allUrls =
+                '钓鱼@http://8.129.30.117:8117/diaoyu.php?url=;乌贼@http://jx.dedyn.io/?url='
+            await setEnv(this.uzTag, '采集解析地址', allUrls)
+        }
+        const jxLinks = allUrls.split(';')
+        const urls = []
+        for (let index = 0; index < jxLinks.length; index++) {
+            const element = jxLinks[index]
+            const name = element.split('@')[0]
+            const api = element.split('@')[1]
+            const response = await req(api + url)
+
+            if (response.code === 200) {
+                let item
+                try {
+                    item = JSON.parse(response.data)
+                } catch (error) {
+                    item = response.data
+                }
+                if (item) {
+                    for (let key in item) {
+                        if (item.hasOwnProperty(key)) {
+                            let value = item[key]
+                            if (value && typeof value === 'string') {
+                                if (
+                                    value.includes('http') &&
+                                    (value.includes('m3u8') ||
+                                        value.includes('mp4'))
+                                ) {
+                                    urls.push({
+                                        url: value,
+                                        name: name,
+                                    })
+                                    continue
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return {
+            urls: urls,
+            headers: {},
+        }
+    }
+}
 
 //MARK: 网盘扩展统一入口
 /**
@@ -1863,6 +1974,7 @@ class PanTools {
         this.uc = new QuarkUC(false)
         this.pan123 = new Pan123()
         this.pan189 = new Pan189()
+        this.jieXi = new JieXi()
 
         /**
          * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
@@ -1879,6 +1991,7 @@ class PanTools {
         this.uc.uzTag = value
         this.pan123.uzTag = value
         this.pan189.uzTag = value
+        this.jieXi.uzTag = value
 
         this.registerRefreshAllCookie()
         this.getAllCookie()
@@ -1953,11 +2066,11 @@ class PanTools {
         //MARK: 1.1 请实现 refreshCookie
         const that = this
         /// 更新 Quark cookie
-        this.quark.updateCookie = function() {
+        this.quark.updateCookie = function () {
             that.updateQuarkUCCookie(PanType.Quark, this.cookie)
         }
         /// 更新 UC cookie
-        this.uc.updateCookie = function() {
+        this.uc.updateCookie = function () {
             that.updateQuarkUCCookie(PanType.UC, this.cookie)
         }
     }
@@ -2018,7 +2131,7 @@ class PanTools {
         if (shareUrl.includes('https://pan.quark.cn')) {
             const data = await this.quark.getFilesByShareUrl(shareUrl)
             return JSON.stringify(data)
-        } else if (shareUrl.includes('https://drive.uc.cn')) {
+        } else if (shareUrl.includes('https://drive.uc.cn'))  {
             const data = await this.ali.getFilesByShareUrl(shareUrl)
             return JSON.stringify(data)
         } else if (this.pan123.getShareData(shareUrl) != null) {
@@ -2026,6 +2139,9 @@ class PanTools {
             return JSON.stringify(data)
         } else if (shareUrl.includes('189.cn')) {
             const data = await this.pan189.getShareData(shareUrl)
+            return JSON.stringify(data)
+        } else if (JieXi.isJieXiUrl(shareUrl)) {
+            const data = await this.jieXi.getVideoList(shareUrl)
             return JSON.stringify(data)
         }
 
@@ -2049,11 +2165,14 @@ class PanTools {
         } else if (item.panType === PanType.UC) {
             const data = await this.uc.getPlayUrl(item.data)
             return JSON.stringify(data)
-        } else if (item.panType === PanType.Pan123) {
+        }  else if (item.panType === PanType.Pan123) {
             const data = await this.pan123.getPlayUrl(item.data)
             return JSON.stringify(data)
         } else if (item.panType === PanType.Pan189) {
             const data = await this.pan189.getPlayUrl(item.data)
+            return JSON.stringify(data)
+        } else if (item.panType === PanType.JieXi) {
+            const data = await this.jieXi.getPlayUrl(item.data)
             return JSON.stringify(data)
         }
 
@@ -2097,12 +2216,9 @@ class PanTools {
                     pdir_fid: '0',
                     page: 1,
                 })
-            }
-        } catch (error) {}
-        return formatBackData({
-            data: list,
-            error: ''
-        })
+            } 
+        } catch (error) { }
+        return formatBackData({ data: list, error: '' })
     }
 
     /**
@@ -2125,13 +2241,10 @@ class PanTools {
                     pdir_fid: args.data.data.fid,
                     page: args.page,
                 })
-            }
-        } catch (error) {}
+            } 
+        } catch (error) { }
 
-        return formatBackData({
-            data: list,
-            error: ''
-        })
+        return formatBackData({ data: list, error: '' })
     }
 
     /**
@@ -2179,7 +2292,7 @@ class PanTools {
                 playData.urls.sort((a, b) => {
                     return b.priority - a.priority
                 })
-            }
+            } 
         } catch (error) {
             playData.error = error.toString()
         }
