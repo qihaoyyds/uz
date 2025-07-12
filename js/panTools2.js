@@ -1,5 +1,5 @@
 //@name:网盘解析工具
-//@version:23
+//@version:22
 //@remark:iOS14 以上版本可用,App v1.6.54 及以上版本可用
 //@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
 // ignore
@@ -2748,7 +2748,6 @@ class PanTools {
 
         this.quark = new QuarkUC(true)
         this.uc = new QuarkUC(false)
-        this.ali = new Ali()
         this.pan123 = new Pan123()
         this.pan189 = new Pan189()
         this.jieXi = new JieXi()
@@ -2766,7 +2765,6 @@ class PanTools {
         this._uzTag = value
         this.quark.uzTag = value
         this.uc.uzTag = value
-        this.ali.uzTag = value
         this.pan123.uzTag = value
         this.pan189.uzTag = value
         this.jieXi.uzTag = value
@@ -2851,10 +2849,6 @@ class PanTools {
         this.uc.updateCookie = function () {
             that.updateQuarkUCCookie(PanType.UC, this.cookie)
         }
-        /// 更新 Ali token
-        this.ali.updateToken = function () {
-            that.updateAliDataEnv(PanType.Ali, this.ali.token)
-        }
     }
 
     async getAllCookie() {
@@ -2865,9 +2859,6 @@ class PanTools {
 
         const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
         this.uc.cookie = ucCookie
-
-        const aliCookie = (await this.getAliDataEnv(PanType.Ali)) ?? ''
-        this.ali.token = aliCookie
 
         this.pan123.passport =
             (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
@@ -2893,7 +2884,6 @@ class PanTools {
         //MARK: 2. 请补充自定义转存文件夹名称
         this.quark.saveDirName = dirName
         this.uc.saveDirName = dirName
-        this.ali.saveDirName = dirName
     }
 
     /**
@@ -2903,7 +2893,6 @@ class PanTools {
         //MARK: 3. 请实现清理转存文件夹
         await this.quark.clearSaveDir()
         await this.uc.clearSaveDir()
-        await this.ali.clearSaveDir()
     }
 
     /**
@@ -2919,9 +2908,6 @@ class PanTools {
         } else if (shareUrl.includes('https://drive.uc.cn')) {
             shareUrl = shareUrl.split('?')[0]
             const data = await this.uc.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('https://www.alipan.com')) {
-            const data = await this.ali.getFilesByShareUrl(shareUrl)
             return JSON.stringify(data)
         } else if (this.pan123.getShareData(shareUrl) != null) {
             const data = await this.pan123.getFilesByShareUrl(shareUrl)
@@ -2954,9 +2940,6 @@ class PanTools {
         } else if (item.panType === PanType.UC) {
             const data = await this.uc.getPlayUrl(item.data)
             return JSON.stringify(data)
-        } else if (item.panType === PanType.Ali) {
-            const data = await this.ali.getPlayUrl(item.data)
-            return JSON.stringify(data)
         } else if (item.panType === PanType.Pan123) {
             const data = await this.pan123.getPlayUrl(item.data)
             return JSON.stringify(data)
@@ -2981,11 +2964,9 @@ class PanTools {
      */
     async getSupportMountPan() {
         await this.getAllCookie()
-        await this.ali.oneKeyReady()
         let x = formatBackData([
             new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
             new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
-            new PanMount('阿里盘', PanType.Ali, this.ali.token !== ''),
         ])
 
         return x
@@ -3007,12 +2988,6 @@ class PanTools {
             } else if (panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: '0',
-                    page: 1,
-                })
-            } else if (panType == PanType.Ali) {
-                list = await this.ali.getFileList({
-                    args: null,
-                    isRoot: true,
                     page: 1,
                 })
             }
@@ -3038,12 +3013,6 @@ class PanTools {
             } else if (args.data.panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: args.data.data.fid,
-                    page: args.page,
-                })
-            } else if (args.data.panType == PanType.Ali) {
-                list = await this.ali.getFileList({
-                    args: args.data,
-                    isRoot: false,
                     page: args.page,
                 })
             }
@@ -3094,28 +3063,6 @@ class PanTools {
                     playData.urls = urls
                 }
                 playData.playHeaders = this.uc.playHeaders
-                playData.urls.sort((a, b) => {
-                    return b.priority - a.priority
-                })
-            } else if (args.panType == PanType.Ali) {
-                if (args.dataType == PanDataType.Video) {
-                    const rawUrls = await this.ali.getDownload({
-                        fileId: args.data.file_id,
-                        isMount: true,
-                    })
-                    const liveUrls = await this.ali.getLiveTranscoding({
-                        fileId: args.data.file_id,
-                        isMount: true,
-                    })
-                    playData.urls = [...rawUrls, ...liveUrls]
-                } else if (args.dataType == PanDataType.Unknown) {
-                    const urls = await this.ali.getDownload({
-                        fileId: args.data.file_id,
-                        isMount: true,
-                    })
-                    playData.urls = urls
-                }
-                playData.playHeaders = this.ali.playHeaders
                 playData.urls.sort((a, b) => {
                     return b.priority - a.priority
                 })
