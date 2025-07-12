@@ -1,5 +1,5 @@
 //@name:网盘解析工具
-//@version:22
+//@version:23
 //@remark:iOS14 以上版本可用,App v1.6.54 及以上版本可用
 //@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
 // ignore
@@ -2131,40 +2131,6 @@ class PanTools {
     }
 
     /**
-     * 获取网盘资源列表
-     * @param {string} shareUrl
-     * @returns {@Promise<PanListDetail>}
-     */
-    async getShareVideos(shareUrl) {
-        //MARK: 4. 请实现获取网盘资源列表
-        if (shareUrl.includes('https://pan.quark.cn')) {
-            const data = await this.quark.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('https://drive.uc.cn')) {
-            shareUrl = shareUrl.split('?')[0]
-            const data = await this.uc.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('https://www.alipan.com')) {
-            const data = await this.ali.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (this.pan123.getShareData(shareUrl) != null) {
-            const data = await this.pan123.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('189.cn')) {
-            const data = await this.pan189.getShareData(shareUrl)
-            return JSON.stringify(data)
-        } else if (JieXi.isJieXiUrl(shareUrl)) {
-            const data = await this.jieXi.getVideoList(shareUrl)
-            return JSON.stringify(data)
-        }
-
-        const data = new PanListDetail()
-        data.error = ''
-
-        return JSON.stringify(data)
-    }
-
-    /**
      * 获取播放信息
      * @param {PanVideoItem} item
      * @returns {@Promise<PanPlayInfo>}
@@ -2209,7 +2175,6 @@ class PanTools {
         let x = formatBackData([
             new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
             new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
-            new PanMount('阿里盘', PanType.Ali, this.ali.token !== ''),
         ])
 
         return x
