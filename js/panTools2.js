@@ -1,7 +1,7 @@
 //@name:网盘解析工具
-//@version:2
+//@version:24
 //@remark:iOS14 以上版本可用,App v1.6.54 及以上版本可用
-//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&百度Cookie##用于播放百度网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
+//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
 // ignore
 import {
     FilterLabel,
@@ -40,12 +40,7 @@ import {
     formatBackData,
 } from '../../core/core/uzUtils.js'
 
-import {
-    cheerio,
-    Crypto,
-    Encrypt,
-    JSONbig
-} from '../../core/core/uz3lib.js'
+import { cheerio, Crypto, Encrypt, JSONbig } from '../../core/core/uz3lib.js'
 // ignore
 
 /**
@@ -72,11 +67,6 @@ const PanType = {
      * 天翼网盘
      */
     Pan189: '天翼网盘',
-
-    /**
-     * 百度网盘
-     */
-    BaiduPan: '百度网盘'
 }
 
 /**
@@ -250,7 +240,8 @@ class QuarkClient {
     static apiUrl = 'https://drive-pc.quark.cn/1/clouddrive/'
     static pr = 'pr=ucpro&fr=pc'
     static httpHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) quark-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) quark-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
         Referer: 'https://pan.quark.cn/',
         'Content-Type': 'application/json',
     }
@@ -262,7 +253,8 @@ class UCClient {
 
     static pr = 'pr=UCBrowser&fr=pc&sys=darwin&ve=1.8.6&ut=' + kUC_UTKeyWord
     static httpHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/2.5.20 Chrome/100.0.4896.160 Electron/18.3.5.4-b478491100 Safari/537.36 Channel/pckk_other_ch',
         Referer: 'https://drive.uc.cn',
         'Content-Type': 'application/json',
     }
@@ -277,7 +269,7 @@ class QuarkUC {
         this.saveDirId = null
         this.saveDirName = 'uz影视'
         this.isVip = false
-        this.updateCookie = function() {}
+        this.updateCookie = function () { }
     }
     uzTag = ''
     ut = ''
@@ -304,9 +296,9 @@ class QuarkUC {
         }
     }
     get headers() {
-        const headers = this.isQuark ?
-            QuarkClient.httpHeaders :
-            UCClient.httpHeaders
+        const headers = this.isQuark
+            ? QuarkClient.httpHeaders
+            : UCClient.httpHeaders
         headers['Cookie'] = this.cookie
         return headers
     }
@@ -333,10 +325,12 @@ class QuarkUC {
 
         return {
             cookie: cookie,
-            Referer: this.isQuark ?
-                'https://pan.quark.cn/' : 'https://drive.uc.cn/',
-            'User-Agent': this.isQuark ?
-                '' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
+            Referer: this.isQuark
+                ? 'https://pan.quark.cn/'
+                : 'https://drive.uc.cn/',
+            'User-Agent': this.isQuark
+                ? ''
+                : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
         }
     }
     fileName = ''
@@ -424,13 +418,7 @@ class QuarkUC {
         let playData = new PanPlayInfo()
 
         try {
-            const {
-                flag,
-                shareId,
-                shareToken,
-                fileId,
-                shareFileToken
-            } = arg
+            const { flag, shareId, shareToken, fileId, shareFileToken } = arg
 
             const saveFileId = await this.save({
                 shareId,
@@ -447,9 +435,7 @@ class QuarkUC {
             }
             this.saveFileIdCaches[fileId] = saveFileId
 
-            let urls = await this.getVideoPlayUrl({
-                fileId: fileId
-            })
+            let urls = await this.getVideoPlayUrl({ fileId: fileId })
             playData.urls = urls
             playData.urls.sort((a, b) => {
                 return b.priority - a.priority
@@ -463,10 +449,7 @@ class QuarkUC {
         return playData
     }
 
-    async getVideoPlayUrl({
-        fileId,
-        isMount = false
-    }) {
+    async getVideoPlayUrl({ fileId, isMount = false }) {
         let rawUrls = await this.getDownload({
             fileId: fileId,
             isMount: isMount,
@@ -531,7 +514,7 @@ class QuarkUC {
                     }
                 }
                 return resp
-            } catch (e) {}
+            } catch (e) { }
             leftRetry--
             await new Promise((resolve) => setTimeout(resolve, 1000))
         }
@@ -550,10 +533,7 @@ class QuarkUC {
         }
         const matches = regex.exec(url)
         if (matches != null) {
-            return {
-                shareId: matches[1],
-                folderId: '0'
-            }
+            return { shareId: matches[1], folderId: '0' }
         }
         return null
     }
@@ -565,7 +545,8 @@ class QuarkUC {
         if (!this.shareTokenCache.hasOwnProperty(shareData.shareId)) {
             delete this.shareTokenCache[shareData.shareId]
             const shareToken = await this.api(
-                `share/sharepage/token?${this.pr}`, {
+                `share/sharepage/token?${this.pr}`,
+                {
                     pwd_id: shareData.shareId,
                     passcode: shareData.sharePwd || '',
                 }
@@ -677,10 +658,7 @@ class QuarkUC {
         let bestMatchIndex = 0
         for (let i = 0; i < targetItems.length; i++) {
             const currentLCS = UZUtils.lcs(mainItem.name, targetItems[i].name)
-            results.push({
-                target: targetItems[i],
-                lcs: currentLCS
-            })
+            results.push({ target: targetItems[i], lcs: currentLCS })
             if (currentLCS.length > results[bestMatchIndex].lcs.length) {
                 bestMatchIndex = i
             }
@@ -760,19 +738,11 @@ class QuarkUC {
      * @param {boolean} [args.clean=false] 是否清理已存在的保存目录
      * @returns {Promise<string|null>} 返回保存成功的文件ID，失败返回null
      */
-    async save({
-        shareId,
-        stoken,
-        fileId,
-        fileToken,
-        clean = false
-    }) {
+    async save({ shareId, stoken, fileId, fileToken, clean = false }) {
         await this.createSaveDir()
         if (this.saveDirId == null) return null
         if (stoken == null) {
-            await this.getShareToken({
-                shareId
-            })
+            await this.getShareToken({ shareId })
             if (!this.shareTokenCache.hasOwnProperty(shareId)) return null
         }
         const saveResult = await this.api(`share/sharepage/save?${this.pr}`, {
@@ -816,10 +786,7 @@ class QuarkUC {
      * @param {number} param0.page - 页码
      * @returns {Promise<[PanMountListData]>}
      */
-    async getFileList({
-        pdir_fid,
-        page
-    }) {
+    async getFileList({ pdir_fid, page }) {
         try {
             pdir_fid = pdir_fid || '0'
             page = page || 1
@@ -864,7 +831,7 @@ class QuarkUC {
                 })
             }
             return mountList
-        } catch (e) {}
+        } catch (e) { }
         return []
     }
 
@@ -929,8 +896,11 @@ class QuarkUC {
         let isMount = args.isMount ?? false
         try {
             const down = await this.api(
-                `file/download?${this.pr}&uc_param_str=`, {
-                    fids: isMount ? [args.fileId] : [this.saveFileIdCaches[args.fileId]],
+                `file/download?${this.pr}&uc_param_str=`,
+                {
+                    fids: isMount
+                        ? [args.fileId]
+                        : [this.saveFileIdCaches[args.fileId]],
                 }
             )
             if (
@@ -942,14 +912,16 @@ class QuarkUC {
                 if (this.isQuark && down.data[0].video_width > 2000) {
                     priority = 0
                 }
-                return [{
-                    name: '原画',
-                    url: down.data[0].download_url,
-                    headers: this.playHeaders,
-                    priority: priority,
-                }, ]
+                return [
+                    {
+                        name: '原画',
+                        url: down.data[0].download_url,
+                        headers: this.playHeaders,
+                        priority: priority,
+                    },
+                ]
             }
-        } catch (error) {}
+        } catch (error) { }
         return []
     }
 }
@@ -957,7 +929,6 @@ class QuarkUC {
 function base64Encode(text) {
     return Crypto.enc.Base64.stringify(Crypto.enc.Utf8.parse(text))
 }
-
 function base64Decode(text) {
     return Crypto.enc.Utf8.stringify(Crypto.enc.Base64.parse(text))
 }
@@ -1001,11 +972,7 @@ class axios {
      * @returns {Promise<ProData>}
      */
     static async get(url, config = {}) {
-        return await axios.request({
-            ...config,
-            url,
-            method: 'GET'
-        })
+        return await axios.request({ ...config, url, method: 'GET' })
     }
     /**
      * POST 请求
@@ -1015,12 +982,7 @@ class axios {
      * @returns {Promise<ProData>}
      */
     static async post(url, data, config = {}) {
-        return await axios.request({
-            ...config,
-            url,
-            method: 'POST',
-            data
-        })
+        return await axios.request({ ...config, url, method: 'POST', data })
     }
 }
 
@@ -1083,8 +1045,10 @@ class Pan123 {
 
     async init() {
         try {
-            if (this.passport.length > 0) {}
-            if (this.password.length > 0) {}
+            if (this.passport.length > 0) {
+            }
+            if (this.password.length > 0) {
+            }
             const auth = await UZUtils.getStorage({
                 key: this.authKey,
                 uzTag: this.uzTag,
@@ -1104,7 +1068,7 @@ class Pan123 {
             } else {
                 await this.loin()
             }
-        } catch (error) {}
+        } catch (error) { }
     }
 
     async loin() {
@@ -1117,10 +1081,12 @@ class Pan123 {
             method: 'POST',
             url: this.loginUrl,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                 'Content-Type': 'application/json',
                 'App-Version': '43',
-                Referer: 'https://login.123pan.com/centerlogin?redirect_url=https%3A%2F%2Fwww.123684.com&source_page=website',
+                Referer:
+                    'https://login.123pan.com/centerlogin?redirect_url=https%3A%2F%2Fwww.123684.com&source_page=website',
             },
             data: data,
         }
@@ -1261,7 +1227,8 @@ class Pan123 {
             },
         })
         if (list.status === 200) {
-            if (list.data.code === 5103) {} else {
+            if (list.data.code === 5103) {
+            } else {
                 let info = list.data.data
                 if (info == null) {
                     return []
@@ -1285,7 +1252,8 @@ class Pan123 {
                 })
                 let result = await Promise.all(
                     cate.map(async (it) =>
-                        this.getShareInfo(shareKey, SharePwd, next, it.fileId))
+                        this.getShareInfo(shareKey, SharePwd, next, it.fileId)
+                    )
                 )
                 result = result.filter(
                     (item) => item !== undefined && item !== null
@@ -1346,7 +1314,8 @@ class Pan123 {
                 method: 'POST',
                 url: `${this.api}download/info`,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'User-Agent':
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                     Authorization: `Bearer ${this.auth}`,
                     'Content-Type': 'application/json;charset=UTF-8',
                     platform: 'android',
@@ -1365,12 +1334,14 @@ class Pan123 {
             const query = qs.toObject(url.split('?')[1])
 
             url = base64Decode(query.params)
-            return [{
-                url: url,
-                name: '原画',
-                priority: 9999,
-                headers: {},
-            }, ]
+            return [
+                {
+                    url: url,
+                    name: '原画',
+                    priority: 9999,
+                    headers: {},
+                },
+            ]
         } catch (error) {
             return []
         }
@@ -1383,7 +1354,8 @@ class Pan123 {
                 method: 'GET',
                 url: `https://www.123684.com/b/api/video/play/info`,
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+                    'User-Agent':
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
                     Authorization: `Bearer ${this.auth}`,
                     'Content-Type': 'application/json;charset=UTF-8',
                     platform: 'android',
@@ -1459,7 +1431,8 @@ class Pan189 {
         }
         this.loginHeaders = {
             'User-Agent': `Mozilla/5.0 (Linux; U; Android 11; ${this.config.model} Build/RP1A.201005.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile Safari/537.36 Ecloud/${this.config.version} Android/30 clientId/${this.config.clientId} clientModel/${this.config.model} clientChannelId/qq proVersion/1.0.6`,
-            Referer: 'https://m.cloud.189.cn/zhuanti/2016/sign/index.jsp?albumBackupOpened=1',
+            Referer:
+                'https://m.cloud.189.cn/zhuanti/2016/sign/index.jsp?albumBackupOpened=1',
             // 'Accept-Encoding': 'gzip, deflate',
         }
 
@@ -1484,7 +1457,8 @@ class Pan189 {
     cookie = ''
     authKey = '189panAuth'
     normalHeaders = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
         Accept: 'application/json;charset=UTF-8',
     }
 
@@ -1514,20 +1488,17 @@ class Pan189 {
             let tHeaders = {
                 'Content-Type': 'application/x-www-form-urlencoded',
                 Accept: 'application/json;charset=UTF-8',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/76.0',
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/76.0',
                 Referer: 'https://open.e.189.cn/',
                 Lt,
                 Reqid,
             }
-            let data = {
-                version: '2.0',
-                appKey: 'cloud'
-            }
+            let data = { version: '2.0', appKey: 'cloud' }
             resp = await axios.post(
                 'https://open.e.189.cn/api/logbox/oauth2/appConf.do',
-                qs.stringify(data), {
-                    headers: tHeaders
-                }
+                qs.stringify(data),
+                { headers: tHeaders }
             )
             let returnUrl = resp.data.data.returnUrl
             let paramId = resp.data.data.paramId
@@ -1563,7 +1534,8 @@ class Pan189 {
             }
             resp = await axios.post(
                 'https://open.e.189.cn/api/logbox/oauth2/loginSubmit.do',
-                qs.stringify(data), {
+                qs.stringify(data),
+                {
                     headers: tHeaders,
                     validateStatus: null,
                 }
@@ -1576,10 +1548,7 @@ class Pan189 {
                     .join(';')
 
                 this.cookie = cookies
-                const headers = {
-                    ...this.loginHeaders,
-                    Cookie: cookies
-                }
+                const headers = { ...this.loginHeaders, Cookie: cookies }
 
                 resp = await axios.get(loginJsonData.toUrl, {
                     headers: headers,
@@ -1588,9 +1557,9 @@ class Pan189 {
 
                 cookies +=
                     '; ' +
-                    resp.headers?.['set-cookie']
-                    ?.map((it) => it.split(';')[0])
-                    .join(';') ?? ''
+                        resp.headers?.['set-cookie']
+                            ?.map((it) => it.split(';')[0])
+                            .join(';') ?? ''
                 this.cookie = cookies
 
                 await UZUtils.setStorage({
@@ -1637,7 +1606,7 @@ class Pan189 {
             if (accessCode) {
                 this.accessCode = accessCode
             }
-        } catch (error) {}
+        } catch (error) { }
     }
 
     fileName = ''
@@ -1724,7 +1693,8 @@ class Pan189 {
             }
             if (accessCode) {
                 let check = await axios.get(
-                    `${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`, {
+                    `${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`,
+                    {
                         headers: this.normalHeaders,
                     }
                 )
@@ -1732,7 +1702,8 @@ class Pan189 {
                     this.shareId = check.data.shareId
                 }
                 let resp = await axios.get(
-                    `${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`, {
+                    `${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`,
+                    {
                         headers: this.normalHeaders,
                     }
                 )
@@ -1808,7 +1779,7 @@ class Pan189 {
                 )
                 return [...videos, ...result.flat()]
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async getShareFile(fileId, pageNum = 1, retry = 0) {
@@ -1816,7 +1787,7 @@ class Pan189 {
             if (!fileId || retry > 3) {
                 return null
             }
-
+            
             const options = {
                 method: 'GET',
                 headers: this.normalHeaders,
@@ -1866,7 +1837,7 @@ class Pan189 {
                 }
             }
             return videos
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async getPlayUrl(data) {
@@ -1896,9 +1867,7 @@ class Pan189 {
     }
 
     async getShareUrl(fileId, shareId) {
-        let headers = {
-            ...this.normalHeaders
-        }
+        let headers = { ...this.normalHeaders }
         if (
             this.cookie.length < 1 &&
             this.account.length > 0 &&
@@ -1911,7 +1880,8 @@ class Pan189 {
 
         try {
             let resp = await axios.get(
-                `${this.api}/portal/getNewVlcVideoPlayUrl.action?shareId=${shareId}&dt=1&fileId=${fileId}&type=4&key=noCache`, {
+                `${this.api}/portal/getNewVlcVideoPlayUrl.action?shareId=${shareId}&dt=1&fileId=${fileId}&type=4&key=noCache`,
+                {
                     headers: headers,
                 }
             )
@@ -1961,553 +1931,268 @@ class Pan189 {
     }
 }
 
-
-// 百度网盘类
-class BaiduPan {
-    constructor() {
-        // 正则表达式匹配百度网盘分享链接
-        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\s?]+)/;
-        this.apiUrl = 'https://pan.baidu.com/api/';
-        this.shareApiUrl = 'https://pan.baidu.com/share/';
-        this.loginUrl = 'https://passport.baidu.com/v2/api/?login';
-
-        // 认证相关
-        this.cookie = '';
-        this.authKey = 'baiduPanAuth';
-        this.uzTag = '';
-        this.bduss = '';
-        this.stoken = '';
-        this.fileName = '';
-
-        // 请求配置
-        this.defaultHeaders = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Referer': 'https://pan.baidu.com/'
-        };
-    }
-
-    /**
-     * 初始化百度网盘实例
-     */
-    async init() {
-        try {
-            const auth = await UZUtils.getStorage({
-                key: this.authKey,
-                uzTag: this.uzTag
-            });
-
-            if (auth?.length > 0) {
-                this.cookie = auth;
-                // 验证cookie是否有效
-                const isValid = await this.validateCookie();
-                if (!isValid) {
-                    await this.clearAuth();
-                    console.warn('百度网盘Cookie已失效，已清除');
-                }
-            }
-        } catch (error) {
-            console.error('百度网盘初始化失败:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * 验证Cookie有效性
-     */
-    async validateCookie() {
-        try {
-            const resp = await axios.get('https://pan.baidu.com/api/user/info', {
-                headers: {
-                    ...this.defaultHeaders,
-                    'Cookie': this.cookie
-                },
-                timeout: 5000
-            });
-
-            return resp.data?.errno === 0;
-        } catch (error) {
-            console.error('验证Cookie失败:', error);
-            return false;
-        }
-    }
-
-    /**
-     * 清除认证信息
-     */
-    async clearAuth() {
-        this.cookie = '';
-        try {
-            await UZUtils.setStorage({
-                key: this.authKey,
-                value: '',
-                uzTag: this.uzTag
-            });
-        } catch (error) {
-            console.error('清除认证信息失败:', error);
-        }
-    }
-
-    /**
-     * 从分享链接中提取关键信息
-     * @param {string} url 百度网盘分享链接
-     * @returns {object|null} 包含shareKey和pwd的对象
-     */
-    getShareData(url) {
-        try {
-            const matches = this.regex.exec(url);
-            if (!matches || !matches[1]) {
-                console.warn('无效的百度网盘分享链接:', url);
-                return null;
-            }
-
-            let shareKey = matches[1];
-            // 提取提取码
-            let pwd = '';
-            const pwdMatch = url.match(/提取码[：:](\w{4})|pwd=(\w{4})/);
-            if (pwdMatch) {
-                pwd = pwdMatch[1] || pwdMatch[2];
-            }
-
-            return {
-                shareKey: shareKey,
-                pwd: pwd
-            };
-        } catch (error) {
-            console.error('解析分享链接失败:', error);
-            return null;
-        }
-    }
-
-    /**
-     * 获取分享链接中的文件列表
-     * @param {string} shareUrl 分享链接
-     * @returns {Promise<string>} JSON格式的文件列表数据
-     */
-    async getFilesByShareUrl(shareUrl) {
-        const data = new PanListDetail();
-
-        try {
-            const shareData = this.getShareData(shareUrl);
-            if (!shareData) {
-                data.error = '无效的分享链接';
-                return JSON.stringify(data);
-            }
-
-            // 获取分享信息
-            const shareInfo = await this.getShareInfo(shareData.shareKey, shareData.pwd);
-            if (!shareInfo || shareInfo.errno !== 0) {
-                data.error = shareInfo?.errmsg || '获取分享信息失败';
-                return JSON.stringify(data);
-            }
-
-            this.fileName = shareInfo.data?.share_title || '百度网盘分享';
-
-            // 获取文件列表
-            const fileList = await this.getFileList(
-                shareData.shareKey,
-                shareInfo.data?.uk,
-                shareInfo.data?.shareid,
-                '0' // 根目录
-            );
-
-            // 过滤视频文件
-            const videos = await this.filterVideos(
-                fileList,
-                shareData.shareKey,
-                shareInfo.data?.uk,
-                shareInfo.data?.shareid
-            );
-
-            // 转换为PanVideoItem格式
-            this.convertToVideoItems(videos, shareInfo.data, data);
-
-        } catch (error) {
-            console.error('获取分享文件列表失败:', error);
-            data.error = error.toString();
-        }
-
-        return JSON.stringify(data);
-    }
-
-    /**
-     * 过滤视频文件并处理子目录
-     */
-    async filterVideos(fileList, shareKey, uk, shareid) {
-        const videos = [];
-
-        // 限制递归深度
-        const maxDepth = 3;
-        const processItems = async (items, depth = 0) => {
-            for (const item of items) {
-                if (depth > maxDepth) continue;
-
-                if (item.isdir === 1) {
-                    // 如果是目录，递归获取子目录文件
-                    try {
-                        const subFiles = await this.getFileList(shareKey, uk, shareid, item.fs_id);
-                        await processItems(subFiles, depth + 1);
-                    } catch (error) {
-                        console.error(`获取子目录文件失败: ${item.path}`, error);
-                    }
-                } else if (item.category === 3) { // 3表示视频
-                    videos.push(item);
-                }
-            }
-        };
-
-        await processItems(fileList);
-        return videos;
-    }
-
-    /**
-     * 将视频文件转换为PanVideoItem格式
-     */
-    convertToVideoItems(videos, shareInfo, data) {
-        for (const video of videos) {
-            let size = video.size / 1024 / 1024;
-            let unit = 'MB';
-            if (size >= 1000) {
-                size = size / 1024;
-                unit = 'GB';
-            }
-            size = size.toFixed(1);
-
-            const videoItem = new PanVideoItem();
-            videoItem.data = {
-                fs_id: video.fs_id,
-                shareid: shareInfo?.shareid,
-                uk: shareInfo?.uk,
-                sign: shareInfo?.sign,
-                timestamp: shareInfo?.timestamp,
-                server_filename: video.server_filename,
-                path: video.path
-            };
-            videoItem.panType = PanType.Baidu;
-            videoItem.name = video.server_filename;
-            videoItem.remark = `[${size}${unit}]`;
-            data.videos.push(videoItem);
-        }
-    }
-
-    /**
-     * 获取分享信息
-     */
-    async getShareInfo(shareKey, pwd = '') {
-        try {
-            const resp = await axios.post(
-                `${this.shareApiUrl}verify?surl=${shareKey}`, {
-                    pwd: pwd,
-                    vcode: '',
-                    vcode_str: ''
-                }, {
-                    headers: {
-                        ...this.defaultHeaders,
-                        'Referer': `https://pan.baidu.com/s/${shareKey}`
-                    },
-                    timeout: 8000
-                }
-            );
-
-            if (resp.data?.errno !== 0) {
-                console.error('获取分享信息失败:', resp.data?.errmsg);
-            }
-            return resp.data;
-        } catch (error) {
-            console.error('获取分享信息请求失败:', error);
-            throw new Error('获取分享信息失败: ' + error.message);
-        }
-    }
-
-    /**
-     * 获取文件列表
-     */
-    async getFileList(shareKey, uk, shareid, dir) {
-        try {
-            const resp = await axios.get(
-                `${this.shareApiUrl}list?uk=${uk}&shareid=${shareid}&dir=${encodeURIComponent(dir)}&surl=${shareKey}`, {
-                    headers: {
-                        ...this.defaultHeaders,
-                        'Referer': `https://pan.baidu.com/s/${shareKey}`
-                    },
-                    timeout: 10000
-                }
-            );
-
-            if (resp.data?.errno !== 0) {
-                console.error('获取文件列表失败:', resp.data?.errmsg);
-                return [];
-            }
-            return resp.data.list || [];
-        } catch (error) {
-            console.error('获取文件列表请求失败:', error);
-            throw new Error('获取文件列表失败: ' + error.message);
-        }
-    }
-
-    /**
-     * 获取播放URL
-     */
-    async getPlayUrl(item) {
-        const playData = new PanPlayInfo();
-
-        try {
-            if (!this.cookie) {
-                playData.error = '请先在环境变量中设置百度网盘Cookie';
-                return JSON.stringify(playData);
-            }
-
-            // 获取下载链接
-            const dlink = await this.getDownloadLink(item.data);
-            if (!dlink) {
-                playData.error = '获取下载链接失败';
-                return JSON.stringify(playData);
-            }
-
-            playData.url = dlink;
-            playData.urls = [{
-                url: dlink,
-                name: '原画',
-                headers: {
-                    ...this.defaultHeaders,
-                    'Cookie': this.cookie,
-                    'Referer': 'https://pan.baidu.com/'
-                },
-                priority: 9999
-            }];
-
-        } catch (error) {
-            console.error('获取播放URL失败:', error);
-            playData.error = error.toString();
-        }
-
-        return JSON.stringify(playData);
-    }
-
-    /**
-     * 获取下载链接
-     */
-    async getDownloadLink(fileData) {
-        try {
-            const resp = await axios.get(
-                `${this.apiUrl}sharedownload?app_id=250528&channel=chunlei&clienttype=12&web=1`, {
-                    params: {
-                        sign: fileData.sign,
-                        timestamp: fileData.timestamp,
-                        encrypt: 0,
-                        product: 'share',
-                        uk: fileData.uk,
-                        primaryid: fileData.shareid,
-                        fid: fileData.fs_id
-                    },
-                    headers: {
-                        ...this.defaultHeaders,
-                        'Cookie': this.cookie
-                    },
-                    timeout: 10000
-                }
-            );
-
-            if (resp.data?.errno !== 0) {
-                console.error('获取下载链接失败:', resp.data?.errmsg);
-                return null;
-            }
-            return resp.data.dlink;
-        } catch (error) {
-            console.error('获取下载链接请求失败:', error);
-            throw new Error('获取下载链接失败: ' + error.message);
-        }
-    }
-}
-
-// 网盘扩展统一入口
+//MARK: 网盘扩展统一入口
+/**
+ * 网盘工具
+ */
 class PanTools {
     constructor() {
-        this.quark = new QuarkUC(true);
-        this.uc = new QuarkUC(false);
-        this.pan123 = new Pan123();
-        this.pan189 = new Pan189();
-        this.baidu = new BaiduPan();
-        this._uzTag = '';
+        //MARK: 1. 在这里初始化 对应网盘的具体实现对象
+
+        this.quark = new QuarkUC(true)
+        this.uc = new QuarkUC(false)
+        this.pan123 = new Pan123()
+        this.pan189 = new Pan189()
+
+        /**
+         * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
+         */
+        this._uzTag = ''
     }
 
+    /**
+     * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
+     */
     set uzTag(value) {
-        this._uzTag = value;
-        this.quark.uzTag = value;
-        this.uc.uzTag = value;
-        this.pan123.uzTag = value;
-        this.pan189.uzTag = value;
-        this.baidu.uzTag = value;
+        this._uzTag = value
+        this.quark.uzTag = value
+        this.uc.uzTag = value
+        this.pan123.uzTag = value
+        this.pan189.uzTag = value
 
-        this.registerRefreshAllCookie();
-        this.getAllCookie();
-        this.setSaveDirName();
+        this.registerRefreshAllCookie()
+        this.getAllCookie()
+        this.setSaveDirName()
     }
 
     get uzTag() {
-        return this._uzTag;
+        return this._uzTag
     }
 
+    /**
+     * 获取 夸克 UC cookie  ** 无法在 PanTools 外部操作**
+     * 环境变量 key 为 PanType.xx + "Cookie",请在 json 文件中添加
+     * @param {PanType} panType
+     * @returns {@Promise<string>}
+     */
     async getQuarkUCCookie(panType) {
-        const cookie = await this.getPanEnv(panType + 'Cookie');
-        return cookie;
+        const cookie = await this.getPanEnv(panType + 'Cookie')
+        return cookie
     }
 
+    /**
+     * 更新 夸克 UC cookie ** 无法在 PanTools 外部操作**
+     * @param {PanType} panType
+     * @param {string} cookie
+     */
     async updateQuarkUCCookie(panType, cookie) {
-        await this.setPanEnv(panType + 'Cookie', cookie);
+        await this.setPanEnv(panType + 'Cookie', cookie)
     }
 
+    /**
+     * 统一获取环境变量
+     * @param {string} envKey
+     * @returns
+     */
     async getPanEnv(envKey) {
-        const env = await getEnv(this.uzTag, envKey);
-        return env;
+        const env = await getEnv(this.uzTag, envKey)
+        return env
     }
 
+    /**
+     * 统一设置环境变量
+     * @param {string} envKey
+     * @param {string} envValue
+     * @returns
+     */
     async setPanEnv(envKey, envValue) {
-        await setEnv(this.uzTag, envKey, envValue);
+        await setEnv(this.uzTag, envKey, envValue)
     }
 
     async registerRefreshAllCookie() {
-        const that = this;
-        this.quark.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.Quark, this.cookie);
-        };
-        this.uc.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.UC, this.cookie);
-        };
+        //MARK: 1.1 请实现 refreshCookie
+        const that = this
+        /// 更新 Quark cookie
+        this.quark.updateCookie = function () {
+            that.updateQuarkUCCookie(PanType.Quark, this.cookie)
+        }
+        /// 更新 UC cookie
+        this.uc.updateCookie = function () {
+            that.updateQuarkUCCookie(PanType.UC, this.cookie)
+        }
     }
 
     async getAllCookie() {
-        const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? '';
-        this.quark.cookie = quarkCookie;
+        //MARK: 1.2 请给 cookie 赋值
 
-        const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? '';
-        this.uc.cookie = ucCookie;
+        const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? ''
+        this.quark.cookie = quarkCookie
 
-        this.pan123.passport = (await this.getPanEnv(PanType.Pan123 + '账号')) ?? '';
-        this.pan123.password = (await this.getPanEnv(PanType.Pan123 + '密码')) ?? '';
+        const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
+        this.uc.cookie = ucCookie
 
-        this.pan189.account = (await this.getPanEnv(PanType.Pan189 + '账号')) ?? '';
-        this.pan189.password = (await this.getPanEnv(PanType.Pan189 + '密码')) ?? '';
-        this.baidu.cookie = (await this.getPanEnv(PanType.Baidu + 'Cookie')) ?? '';
-        await this.baidu.init();
+        this.pan123.passport =
+            (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
+        this.pan123.password =
+            (await this.getPanEnv(PanType.Pan123 + '密码')) ?? ''
+
+        this.pan189.account =
+            (await this.getPanEnv(PanType.Pan189 + '账号')) ?? ''
+        this.pan189.password =
+            (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
     }
 
+    /**
+     * 设置用户指定的转存文件夹名称
+     */
     async setSaveDirName() {
-        let dirName = await getEnv(this.uzTag, '转存文件夹名称');
+        var dirName = await getEnv(this.uzTag, '转存文件夹名称')
+
         if (dirName == null || dirName === '') {
-            dirName = 'uz影视';
-            await setEnv(this.uzTag, '转存文件夹名称', dirName);
+            dirName = 'uz影视'
+            await setEnv(this.uzTag, '转存文件夹名称', dirName)
         }
-        this.quark.saveDirName = dirName;
-        this.uc.saveDirName = dirName;
+        //MARK: 2. 请补充自定义转存文件夹名称
+        this.quark.saveDirName = dirName
+        this.uc.saveDirName = dirName
     }
 
+    /**
+     * 清理转存文件夹
+     */
     async cleanSaveDir() {
-        await this.quark.clearSaveDir();
-        await this.uc.clearSaveDir();
+        //MARK: 3. 请实现清理转存文件夹
+        await this.quark.clearSaveDir()
+        await this.uc.clearSaveDir()
     }
 
+    /**
+     * 获取网盘资源列表
+     * @param {string} shareUrl
+     * @returns {@Promise<PanListDetail>}
+     */
     async getShareVideos(shareUrl) {
+        //MARK: 4. 请实现获取网盘资源列表
         if (shareUrl.includes('https://pan.quark.cn')) {
-            const data = await this.quark.getFilesByShareUrl(shareUrl);
-            return JSON.stringify(data);
+            const data = await this.quark.getFilesByShareUrl(shareUrl)
+            return JSON.stringify(data)
         } else if (shareUrl.includes('https://drive.uc.cn')) {
-            shareUrl = shareUrl.split('?')[0];
-            const data = await this.uc.getFilesByShareUrl(shareUrl);
-            return JSON.stringify(data);
+            shareUrl = shareUrl.split('?')[0]
+            const data = await this.uc.getFilesByShareUrl(shareUrl)
+            return JSON.stringify(data)
         } else if (this.pan123.getShareData(shareUrl) != null) {
-            const data = await this.pan123.getFilesByShareUrl(shareUrl);
-            return JSON.stringify(data);
+            const data = await this.pan123.getFilesByShareUrl(shareUrl)
+            return JSON.stringify(data)
         } else if (shareUrl.includes('189.cn')) {
-            const data = await this.pan189.getShareData(shareUrl);
-            return JSON.stringify(data);
-        } else if (shareUrl.includes('baidu.com')) {
-            const data = await this.baidu.getFilesByShareUrl(shareUrl);
-            return JSON.stringify(data);
+            const data = await this.pan189.getShareData(shareUrl)
+            return JSON.stringify(data)
         }
 
-        const data = new PanListDetail();
-        data.error = '';
-        return JSON.stringify(data);
+        const data = new PanListDetail()
+        data.error = ''
+
+        return JSON.stringify(data)
     }
 
+    /**
+     * 获取播放信息
+     * @param {PanVideoItem} item
+     * @returns {@Promise<PanPlayInfo>}
+     */
     async getPlayInfo(item) {
-        await this.getAllCookie();
+        //MARK: 5. 请实现获取播放信息
+        await this.getAllCookie()
         if (item.panType === PanType.Quark) {
-            const data = await this.quark.getPlayUrl(item.data);
-            return JSON.stringify(data);
+            const data = await this.quark.getPlayUrl(item.data)
+            return JSON.stringify(data)
         } else if (item.panType === PanType.UC) {
-            const data = await this.uc.getPlayUrl(item.data);
-            return JSON.stringify(data);
+            const data = await this.uc.getPlayUrl(item.data)
+            return JSON.stringify(data)
         } else if (item.panType === PanType.Pan123) {
-            const data = await this.pan123.getPlayUrl(item.data);
-            return JSON.stringify(data);
+            const data = await this.pan123.getPlayUrl(item.data)
+            return JSON.stringify(data)
         } else if (item.panType === PanType.Pan189) {
-            const data = await this.pan189.getPlayUrl(item.data);
-            return JSON.stringify(data);
-        } else if (item.panType === PanType.Baidu) {
-            const data = await this.baidu.getPlayUrl(item);
-            return JSON.stringify(data);
+            const data = await this.pan189.getPlayUrl(item.data)
+            return JSON.stringify(data)
         }
 
-        const data = new PanPlayInfo();
-        data.error = '暂不支持 ' + item.panType + ' 网盘~';
-        return JSON.stringify(data);
+        const data = new PanPlayInfo()
+        data.error = '暂不支持 ' + item.panType + ' 网盘~'
+        return JSON.stringify(data)
     }
 
+    //MARK: - 伪挂载相关  分页大小建议为200
+
+    /**
+     * 返回支持挂载的网盘
+     * @returns {@Promise<[PanMount]>}
+     */
     async getSupportMountPan() {
-        await this.getAllCookie();
-        return formatBackData([
+        await this.getAllCookie()
+        let x = formatBackData([
             new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
             new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
-            new PanMount('百度网盘', PanType.Baidu, this.baidu.cookie !== ''),
-        ]);
+        ])
+
+        return x
     }
 
+    /**
+     * 获取网盘根目录
+     * @param {PanType} panType
+     * @returns {@Promise<{data:[PanMountListData],error:string}>}
+     */
     async getRootDir(panType) {
-        let list = [];
+        let list = []
         try {
             if (panType == PanType.Quark) {
                 list = await this.quark.getFileList({
                     pdir_fid: '0',
                     page: 1,
-                });
+                })
             } else if (panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: '0',
                     page: 1,
-                });
+                })
             }
-        } catch (error) {}
-        return formatBackData({
-            data: list,
-            error: ''
-        });
+        } catch (error) { }
+        return formatBackData({ data: list, error: '' })
     }
 
+    /**
+     * 获取网盘挂载子目录
+     * @param {object} args
+     * @param {PanMountListData} args.data
+     * @param {number} args.page
+     * @returns {@Promise<{data:[PanMountListData],error:string}>}
+     */
     async getMountDir(args) {
-        let list = [];
+        let list = []
         try {
             if (args.data.panType == PanType.Quark) {
                 list = await this.quark.getFileList({
                     pdir_fid: args.data.data.fid,
                     page: args.page,
-                });
+                })
             } else if (args.data.panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: args.data.data.fid,
                     page: args.page,
-                });
+                })
             }
-        } catch (error) {}
+        } catch (error) { }
 
-        return formatBackData({
-            data: list,
-            error: ''
-        });
+        return formatBackData({ data: list, error: '' })
     }
 
+    /**
+     * 获取网盘挂载文件真实地址
+     * @param {PanMountListData} args
+     * @returns {@Promise<PanPlayInfo>}
+     */
     async getMountFile(args) {
-        let playData = new PanPlayInfo();
+        let playData = new PanPlayInfo()
 
         try {
             if (args.panType == PanType.Quark) {
@@ -2515,44 +2200,48 @@ class PanTools {
                     const urls = await this.quark.getVideoPlayUrl({
                         fileId: args.data.fid,
                         isMount: true,
-                    });
-                    playData.urls = urls;
+                    })
+                    playData.urls = urls
                 } else if (args.dataType == PanDataType.Unknown) {
                     const urls = await this.quark.getDownload({
                         fileId: args.data.fid,
                         isMount: true,
-                    });
-                    playData.urls = urls;
+                    })
+                    playData.urls = urls
                 }
-                playData.playHeaders = this.quark.playHeaders;
-                playData.urls.sort((a, b) => b.priority - a.priority);
+                playData.playHeaders = this.quark.playHeaders
+                playData.urls.sort((a, b) => {
+                    return b.priority - a.priority
+                })
             } else if (args.panType == PanType.UC) {
                 if (args.dataType == PanDataType.Video) {
                     const urls = await this.uc.getVideoPlayUrl({
                         fileId: args.data.fid,
                         isMount: true,
-                    });
-                    playData.urls = urls;
+                    })
+                    playData.urls = urls
                 } else if (args.dataType == PanDataType.Unknown) {
                     const urls = await this.uc.getDownload({
                         fileId: args.data.fid,
                         isMount: true,
-                    });
-                    playData.urls = urls;
+                    })
+                    playData.urls = urls
                 }
-                playData.playHeaders = this.uc.playHeaders;
-                playData.urls.sort((a, b) => b.priority - a.priority);
+                playData.playHeaders = this.uc.playHeaders
+                playData.urls.sort((a, b) => {
+                    return b.priority - a.priority
+                })
             }
         } catch (error) {
-            playData.error = error.toString();
+            playData.error = error.toString()
         }
         if (playData.urls.length > 0) {
-            playData.url = playData.urls[0].url;
+            playData.url = playData.urls[0].url
         }
 
-        return formatBackData(playData);
+        return formatBackData(playData)
     }
 }
 
 // 固定实例名称
-const uzPanToolsInstance = new PanTools();
+const uzPanToolsInstance = new PanTools()
