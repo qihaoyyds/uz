@@ -2260,7 +2260,7 @@ class PanTools {
      * @param {PanType} panType
      * @param {string} cookie
      */
-    async updateBaiduQuarkUCCookie(panType, cookie) {
+    async updateQuarkUCCookie(panType, cookie) {
         await this.setPanEnv(panType + 'Cookie', cookie)
     }
 
@@ -2289,14 +2289,14 @@ class PanTools {
         const that = this
         /// 更新 Quark cookie
         this.quark.updateCookie = function() {
-            that.updateBaiduQuarkUCCookie(PanType.Quark, this.cookie)
+            that.updateQuarkUCCookie(PanType.Quark, this.cookie)
         }
         /// 更新 UC cookie
         this.uc.updateCookie = function() {
-            that.updateBaiduQuarkUCCookie(PanType.UC, this.cookie)
+            that.updateQuarkUCCookie(PanType.UC, this.cookie)
         }
         this.baidu.updateCookie = function() {
-            that.updateBaiduQuarkUCCookie(PanType.Baidu, this.cookie)
+            that.updateQuarkUCCookie(PanType.Baidu, this.cookie)
         }
 
         async getAllCookie() {
