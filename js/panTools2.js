@@ -1969,7 +1969,6 @@ class BaiduPan {
         this.apiUrl = 'https://pan.baidu.com/api/'
         this.shareApiUrl = 'https://pan.baidu.com/share/'
         this.loginUrl = 'https://passport.baidu.com/v2/api/?login'
-        this.cookie = ''
         this.authKey = 'baiduPanAuth'
     }
 
@@ -2251,7 +2250,7 @@ class PanTools {
      * @param {PanType} panType
      * @returns {@Promise<string>}
      */
-    async getQuarkUCCookie(panType) {
+    async getBaiduQuarkUCCookie(panType) {
         const cookie = await this.getPanEnv(panType + 'Cookie')
         return cookie
     }
@@ -2261,7 +2260,7 @@ class PanTools {
      * @param {PanType} panType
      * @param {string} cookie
      */
-    async updateQuarkUCCookie(panType, cookie) {
+    async updateBaiduQuarkUCCookie(panType, cookie) {
         await this.setPanEnv(panType + 'Cookie', cookie)
     }
 
@@ -2290,249 +2289,252 @@ class PanTools {
         const that = this
         /// 更新 Quark cookie
         this.quark.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.Quark, this.cookie)
+            that.updateBaiduQuarkUCCookie(PanType.Quark, this.cookie)
         }
         /// 更新 UC cookie
         this.uc.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.UC, this.cookie)
+            that.updateBaiduQuarkUCCookie(PanType.UC, this.cookie)
         }
-    }
-
-    async getAllCookie() {
-        //MARK: 1.2 请给 cookie 赋值
-
-        const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? ''
-        this.quark.cookie = quarkCookie
-
-        const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
-        this.uc.cookie = ucCookie
-
-        this.pan123.passport =
-            (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
-        this.pan123.password =
-            (await this.getPanEnv(PanType.Pan123 + '密码')) ?? ''
-
-        this.pan189.account =
-            (await this.getPanEnv(PanType.Pan189 + '账号')) ?? ''
-        this.pan189.password =
-            (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
-        this.baidu.cookie = (await this.getPanEnv(PanType.Baidu + 'Cookie')) ?? ''
-        await this.baidu.init()
-    }
-
-    /**
-     * 设置用户指定的转存文件夹名称
-     */
-    async setSaveDirName() {
-        var dirName = await getEnv(this.uzTag, '转存文件夹名称')
-
-        if (dirName == null || dirName === '') {
-            dirName = 'uz影视'
-            await setEnv(this.uzTag, '转存文件夹名称', dirName)
-        }
-        //MARK: 2. 请补充自定义转存文件夹名称
-        this.quark.saveDirName = dirName
-        this.uc.saveDirName = dirName
-    }
-
-    /**
-     * 清理转存文件夹
-     */
-    async cleanSaveDir() {
-        //MARK: 3. 请实现清理转存文件夹
-        await this.quark.clearSaveDir()
-        await this.uc.clearSaveDir()
-    }
-
-    /**
-     * 获取网盘资源列表
-     * @param {string} shareUrl
-     * @returns {@Promise<PanListDetail>}
-     */
-    async getShareVideos(shareUrl) {
-        //MARK: 4. 请实现获取网盘资源列表
-        if (shareUrl.includes('https://pan.quark.cn')) {
-            const data = await this.quark.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('https://drive.uc.cn')) {
-            shareUrl = shareUrl.split('?')[0]
-            const data = await this.uc.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (this.pan123.getShareData(shareUrl) != null) {
-            const data = await this.pan123.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('189.cn')) {
-            const data = await this.pan189.getShareData(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('baidu.com')) {
-            const data = await this.baidu.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
+        this.baidu.updateCookie = function() {
+            that.updateBaiduQuarkUCCookie(PanType.Baidu, this.cookie)
         }
 
-        const data = new PanListDetail()
-        data.error = ''
+        async getAllCookie() {
+            //MARK: 1.2 请给 cookie 赋值
 
-        return JSON.stringify(data)
-    }
+            const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? ''
+            this.quark.cookie = quarkCookie
 
-    /**
-     * 获取播放信息
-     * @param {PanVideoItem} item
-     * @returns {@Promise<PanPlayInfo>}
-     */
-    async getPlayInfo(item) {
-        //MARK: 5. 请实现获取播放信息
-        await this.getAllCookie()
-        if (item.panType === PanType.Quark) {
-            const data = await this.quark.getPlayUrl(item.data)
-            return JSON.stringify(data)
-        } else if (item.panType === PanType.UC) {
-            const data = await this.uc.getPlayUrl(item.data)
-            return JSON.stringify(data)
-        } else if (item.panType === PanType.Pan123) {
-            const data = await this.pan123.getPlayUrl(item.data)
-            return JSON.stringify(data)
-        } else if (item.panType === PanType.Pan189) {
-            const data = await this.pan189.getPlayUrl(item.data)
-            return JSON.stringify(data)
-        } else if (item.panType === PanType.Baidu) {
-            const data = await this.baidu.getPlayUrl(item)
-            return JSON.stringify(data)
+            const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
+            this.uc.cookie = ucCookie
+
+            const baidu.cookie = (await this.getbaidu(PanType.Baidu)) ?? "
+            this.baidu.cookie = baiduCookie
+
+            this.pan123.passport =
+                (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
+            this.pan123.password =
+                (await this.getPanEnv(PanType.Pan123 + '密码')) ?? ''
+
+            this.pan189.account =
+                (await this.getPanEnv(PanType.Pan189 + '账号')) ?? ''
+            this.pan189.password =
+                (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
         }
 
-        const data = new PanPlayInfo()
-        data.error = '暂不支持 ' + item.panType + ' 网盘~'
-        return JSON.stringify(data)
-    }
+        /**
+         * 设置用户指定的转存文件夹名称
+         */
+        async setSaveDirName() {
+            var dirName = await getEnv(this.uzTag, '转存文件夹名称')
 
-    //MARK: - 伪挂载相关  分页大小建议为200
-
-    /**
-     * 返回支持挂载的网盘
-     * @returns {@Promise<[PanMount]>}
-     */
-    async getSupportMountPan() {
-        await this.getAllCookie()
-        let x = formatBackData([
-            new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
-            new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
-            new PanMount('百度网盘', PanType.Baidu, this.baidu.cookie !== ''),
-        ])
-
-        return x
-    }
-
-    /**
-     * 获取网盘根目录
-     * @param {PanType} panType
-     * @returns {@Promise<{data:[PanMountListData],error:string}>}
-     */
-    async getRootDir(panType) {
-        let list = []
-        try {
-            if (panType == PanType.Quark) {
-                list = await this.quark.getFileList({
-                    pdir_fid: '0',
-                    page: 1,
-                })
-            } else if (panType == PanType.UC) {
-                list = await this.uc.getFileList({
-                    pdir_fid: '0',
-                    page: 1,
-                })
+            if (dirName == null || dirName === '') {
+                dirName = 'uz影视'
+                await setEnv(this.uzTag, '转存文件夹名称', dirName)
             }
-        } catch (error) {}
-        return formatBackData({
-            data: list,
-            error: ''
-        })
-    }
+            //MARK: 2. 请补充自定义转存文件夹名称
+            this.quark.saveDirName = dirName
+            this.uc.saveDirName = dirName
+        }
 
-    /**
-     * 获取网盘挂载子目录
-     * @param {object} args
-     * @param {PanMountListData} args.data
-     * @param {number} args.page
-     * @returns {@Promise<{data:[PanMountListData],error:string}>}
-     */
-    async getMountDir(args) {
-        let list = []
-        try {
-            if (args.data.panType == PanType.Quark) {
-                list = await this.quark.getFileList({
-                    pdir_fid: args.data.data.fid,
-                    page: args.page,
-                })
-            } else if (args.data.panType == PanType.UC) {
-                list = await this.uc.getFileList({
-                    pdir_fid: args.data.data.fid,
-                    page: args.page,
-                })
+        /**
+         * 清理转存文件夹
+         */
+        async cleanSaveDir() {
+            //MARK: 3. 请实现清理转存文件夹
+            await this.quark.clearSaveDir()
+            await this.uc.clearSaveDir()
+        }
+
+        /**
+         * 获取网盘资源列表
+         * @param {string} shareUrl
+         * @returns {@Promise<PanListDetail>}
+         */
+        async getShareVideos(shareUrl) {
+            //MARK: 4. 请实现获取网盘资源列表
+            if (shareUrl.includes('https://pan.quark.cn')) {
+                const data = await this.quark.getFilesByShareUrl(shareUrl)
+                return JSON.stringify(data)
+            } else if (shareUrl.includes('https://drive.uc.cn')) {
+                shareUrl = shareUrl.split('?')[0]
+                const data = await this.uc.getFilesByShareUrl(shareUrl)
+                return JSON.stringify(data)
+            } else if (this.pan123.getShareData(shareUrl) != null) {
+                const data = await this.pan123.getFilesByShareUrl(shareUrl)
+                return JSON.stringify(data)
+            } else if (shareUrl.includes('189.cn')) {
+                const data = await this.pan189.getShareData(shareUrl)
+                return JSON.stringify(data)
+            } else if (shareUrl.includes('baidu.com')) {
+                const data = await this.baidu.getFilesByShareUrl(shareUrl)
+                return JSON.stringify(data)
             }
-        } catch (error) {}
 
-        return formatBackData({
-            data: list,
-            error: ''
-        })
-    }
+            const data = new PanListDetail()
+            data.error = ''
 
-    /**
-     * 获取网盘挂载文件真实地址
-     * @param {PanMountListData} args
-     * @returns {@Promise<PanPlayInfo>}
-     */
-    async getMountFile(args) {
-        let playData = new PanPlayInfo()
+            return JSON.stringify(data)
+        }
 
-        try {
-            if (args.panType == PanType.Quark) {
-                if (args.dataType == PanDataType.Video) {
-                    const urls = await this.quark.getVideoPlayUrl({
-                        fileId: args.data.fid,
-                        isMount: true,
+        /**
+         * 获取播放信息
+         * @param {PanVideoItem} item
+         * @returns {@Promise<PanPlayInfo>}
+         */
+        async getPlayInfo(item) {
+            //MARK: 5. 请实现获取播放信息
+            await this.getAllCookie()
+            if (item.panType === PanType.Quark) {
+                const data = await this.quark.getPlayUrl(item.data)
+                return JSON.stringify(data)
+            } else if (item.panType === PanType.UC) {
+                const data = await this.uc.getPlayUrl(item.data)
+                return JSON.stringify(data)
+            } else if (item.panType === PanType.Pan123) {
+                const data = await this.pan123.getPlayUrl(item.data)
+                return JSON.stringify(data)
+            } else if (item.panType === PanType.Pan189) {
+                const data = await this.pan189.getPlayUrl(item.data)
+                return JSON.stringify(data)
+            } else if (item.panType === PanType.Baidu) {
+                const data = await this.baidu.getPlayUrl(item)
+                return JSON.stringify(data)
+            }
+
+            const data = new PanPlayInfo()
+            data.error = '暂不支持 ' + item.panType + ' 网盘~'
+            return JSON.stringify(data)
+        }
+
+        //MARK: - 伪挂载相关  分页大小建议为200
+
+        /**
+         * 返回支持挂载的网盘
+         * @returns {@Promise<[PanMount]>}
+         */
+        async getSupportMountPan() {
+            await this.getAllCookie()
+            let x = formatBackData([
+                new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
+                new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
+                new PanMount('百度网盘', PanType.Baidu, this.baidu.cookie !== ''),
+            ])
+
+            return x
+        }
+
+        /**
+         * 获取网盘根目录
+         * @param {PanType} panType
+         * @returns {@Promise<{data:[PanMountListData],error:string}>}
+         */
+        async getRootDir(panType) {
+            let list = []
+            try {
+                if (panType == PanType.Quark) {
+                    list = await this.quark.getFileList({
+                        pdir_fid: '0',
+                        page: 1,
                     })
-                    playData.urls = urls
-                } else if (args.dataType == PanDataType.Unknown) {
-                    const urls = await this.quark.getDownload({
-                        fileId: args.data.fid,
-                        isMount: true,
+                } else if (panType == PanType.UC) {
+                    list = await this.uc.getFileList({
+                        pdir_fid: '0',
+                        page: 1,
                     })
-                    playData.urls = urls
                 }
-                playData.playHeaders = this.quark.playHeaders
-                playData.urls.sort((a, b) => {
-                    return b.priority - a.priority
-                })
-            } else if (args.panType == PanType.UC) {
-                if (args.dataType == PanDataType.Video) {
-                    const urls = await this.uc.getVideoPlayUrl({
-                        fileId: args.data.fid,
-                        isMount: true,
+            } catch (error) {}
+            return formatBackData({
+                data: list,
+                error: ''
+            })
+        }
+
+        /**
+         * 获取网盘挂载子目录
+         * @param {object} args
+         * @param {PanMountListData} args.data
+         * @param {number} args.page
+         * @returns {@Promise<{data:[PanMountListData],error:string}>}
+         */
+        async getMountDir(args) {
+            let list = []
+            try {
+                if (args.data.panType == PanType.Quark) {
+                    list = await this.quark.getFileList({
+                        pdir_fid: args.data.data.fid,
+                        page: args.page,
                     })
-                    playData.urls = urls
-                } else if (args.dataType == PanDataType.Unknown) {
-                    const urls = await this.uc.getDownload({
-                        fileId: args.data.fid,
-                        isMount: true,
+                } else if (args.data.panType == PanType.UC) {
+                    list = await this.uc.getFileList({
+                        pdir_fid: args.data.data.fid,
+                        page: args.page,
                     })
-                    playData.urls = urls
                 }
-                playData.playHeaders = this.uc.playHeaders
-                playData.urls.sort((a, b) => {
-                    return b.priority - a.priority
-                })
+            } catch (error) {}
+
+            return formatBackData({
+                data: list,
+                error: ''
+            })
+        }
+
+        /**
+         * 获取网盘挂载文件真实地址
+         * @param {PanMountListData} args
+         * @returns {@Promise<PanPlayInfo>}
+         */
+        async getMountFile(args) {
+            let playData = new PanPlayInfo()
+
+            try {
+                if (args.panType == PanType.Quark) {
+                    if (args.dataType == PanDataType.Video) {
+                        const urls = await this.quark.getVideoPlayUrl({
+                            fileId: args.data.fid,
+                            isMount: true,
+                        })
+                        playData.urls = urls
+                    } else if (args.dataType == PanDataType.Unknown) {
+                        const urls = await this.quark.getDownload({
+                            fileId: args.data.fid,
+                            isMount: true,
+                        })
+                        playData.urls = urls
+                    }
+                    playData.playHeaders = this.quark.playHeaders
+                    playData.urls.sort((a, b) => {
+                        return b.priority - a.priority
+                    })
+                } else if (args.panType == PanType.UC) {
+                    if (args.dataType == PanDataType.Video) {
+                        const urls = await this.uc.getVideoPlayUrl({
+                            fileId: args.data.fid,
+                            isMount: true,
+                        })
+                        playData.urls = urls
+                    } else if (args.dataType == PanDataType.Unknown) {
+                        const urls = await this.uc.getDownload({
+                            fileId: args.data.fid,
+                            isMount: true,
+                        })
+                        playData.urls = urls
+                    }
+                    playData.playHeaders = this.uc.playHeaders
+                    playData.urls.sort((a, b) => {
+                        return b.priority - a.priority
+                    })
+                }
+            } catch (error) {
+                playData.error = error.toString()
             }
-        } catch (error) {
-            playData.error = error.toString()
-        }
-        if (playData.urls.length > 0) {
-            playData.url = playData.urls[0].url
-        }
+            if (playData.urls.length > 0) {
+                playData.url = playData.urls[0].url
+            }
 
-        return formatBackData(playData)
+            return formatBackData(playData)
+        }
     }
-}
 
-// 固定实例名称
-const uzPanToolsInstance = new PanTools()
+    // 固定实例名称
+    const uzPanToolsInstance = new PanTools()
