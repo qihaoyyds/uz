@@ -2304,7 +2304,7 @@ class PanTools {
         } else if (shareUrl.includes('189.cn')) {
             const data = await this.pan189.getShareData(shareUrl)
             return JSON.stringify(data)
-        } else if (shareUrl.includes('baidu.com')) {
+        } else if (shareUrl.includes('https://pan.baidu.com')) {
             const data = await this.baidu.getFilesByShareUrl(shareUrl)
             return JSON.stringify(data)
         }
