@@ -2317,6 +2317,7 @@ class PanTools {
         this.pan189.password =
             (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
         this.baidu.cookie = (await this.getPanEnv(PanType.Baidu + 'Cookie')) ?? ''
+        await this.baidu.init()
     }
 
     /**
