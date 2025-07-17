@@ -2254,10 +2254,8 @@ class PanTools {
         this.pan189.password =
             (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
 
-        this.BaiduPan.account =
-            (await this.getPanEnv(PanType.BaiduPan + '账号')) ?? ''
-        this.BaiduPan.password =
-            (await this.getPanEnv(PanType.BaiduPan + '密码')) ?? ''
+        this.BaiduPan.account = (await this.getPanEnv(PanType.BaiduPan + '账号')) ?? '';
+        this.BaiduPan.password = (await this.getPanEnv(PanType.BaiduPan + '密码')) ?? '';
     }
 
     /**
