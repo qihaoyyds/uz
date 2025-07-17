@@ -1,7 +1,7 @@
 //@name:网盘解析工具
-//@version:25
+//@version:2
 //@remark:iOS14 以上版本可用,App v1.6.54 及以上版本可用
-//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&百度Cookie##用于播放百度网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&百度网盘账号##用于播放百度网盘视频&&百度网盘密码
+//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&百度Cookie##用于播放百度网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
 // ignore
 import {
     FilterLabel,
@@ -1962,466 +1962,552 @@ class Pan189 {
 }
 
 
+// 百度网盘类
 class BaiduPan {
     constructor() {
-        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\s]+)/
-        this.apiUrl = 'https://pan.baidu.com/api/'
-        this.shareApiUrl = 'https://pan.baidu.com/share/'
-        this.loginUrl = 'https://passport.baidu.com/v2/api/?login'
-        this.cookie = ''
-        this.authKey = 'baiduPanAuth'
-        this.username = ''
-        this.password = ''
+        // 正则表达式匹配百度网盘分享链接
+        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\s?]+)/;
+        this.apiUrl = 'https://pan.baidu.com/api/';
+        this.shareApiUrl = 'https://pan.baidu.com/share/';
+        this.loginUrl = 'https://passport.baidu.com/v2/api/?login';
+
+        // 认证相关
+        this.cookie = '';
+        this.authKey = 'baiduPanAuth';
+        this.uzTag = '';
+        this.bduss = '';
+        this.stoken = '';
+        this.fileName = '';
+
+        // 请求配置
+        this.defaultHeaders = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://pan.baidu.com/'
+        };
     }
 
-    uzTag = ''
-    bduss = ''
-    stoken = ''
-
+    /**
+     * 初始化百度网盘实例
+     */
     async init() {
         try {
-            // 从环境变量获取账号密码
-            this.username = await this.getPanEnv(PanType.Baidu + '账号') || ''
-            this.password = await this.getPanEnv(PanType.Baidu + '密码') || ''
-
-            // 尝试从存储获取Cookie
             const auth = await UZUtils.getStorage({
                 key: this.authKey,
                 uzTag: this.uzTag
-            })
+            });
 
             if (auth?.length > 0) {
-                this.cookie = auth
+                this.cookie = auth;
                 // 验证cookie是否有效
-                const isValid = await this.validateCookie()
+                const isValid = await this.validateCookie();
                 if (!isValid) {
-                    console.log('Cookie已失效，尝试重新登录...')
-                    await this.clearAuth()
-                    if (this.username && this.password) {
-                        await this.login(this.username, this.password)
-                    }
+                    await this.clearAuth();
+                    console.warn('百度网盘Cookie已失效，已清除');
                 }
-            } else if (this.username && this.password) {
-                // 如果有账号密码但无Cookie，尝试登录
-                await this.login(this.username, this.password)
             }
         } catch (error) {
-            console.error('百度网盘初始化失败:', error)
+            console.error('百度网盘初始化失败:', error);
+            throw error;
         }
     }
 
+    /**
+     * 验证Cookie有效性
+     */
     async validateCookie() {
         try {
-            if (!this.cookie) return false
-
-            // 检查Cookie中是否包含关键字段
-            if (!this.cookie.includes('BDUSS=') || !this.cookie.includes('STOKEN=')) {
-                return false
-            }
-
-            // 验证Cookie有效性
             const resp = await axios.get('https://pan.baidu.com/api/user/info', {
-                headers: this.getRequestHeaders(),
-                timeout: 10000
-            })
-
-            return resp.data?.errno === 0
-        } catch (error) {
-            console.error('验证Cookie失败:', error)
-            return false
-        }
-    }
-
-    async login(username, password) {
-        try {
-            if (!username || !password) {
-                console.error('登录失败: 缺少用户名或密码')
-                return false
-            }
-
-            // 这里简化了登录流程，实际百度登录需要处理验证码等复杂情况
-            // 更可靠的方案是让用户手动获取Cookie
-
-            console.log('正在尝试登录百度网盘...')
-
-            // 模拟登录过程（实际实现会更复杂）
-            const loginResp = await axios.post(this.loginUrl, {
-                username,
-                password,
-                // 其他必要参数
-            }, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Referer': 'https://pan.baidu.com/'
-                }
-            })
+                    ...this.defaultHeaders,
+                    'Cookie': this.cookie
+                },
+                timeout: 5000
+            });
 
-            // 从响应中提取Cookie
-            if (loginResp.headers['set-cookie']) {
-                this.cookie = loginResp.headers['set-cookie']
-                    .map(c => c.split(';')[0])
-                    .join('; ')
+            return resp.data?.errno === 0;
+        } catch (error) {
+            console.error('验证Cookie失败:', error);
+            return false;
+        }
+    }
 
-                // 保存Cookie
-                await this.saveAuth()
-                return true
+    /**
+     * 清除认证信息
+     */
+    async clearAuth() {
+        this.cookie = '';
+        try {
+            await UZUtils.setStorage({
+                key: this.authKey,
+                value: '',
+                uzTag: this.uzTag
+            });
+        } catch (error) {
+            console.error('清除认证信息失败:', error);
+        }
+    }
+
+    /**
+     * 从分享链接中提取关键信息
+     * @param {string} url 百度网盘分享链接
+     * @returns {object|null} 包含shareKey和pwd的对象
+     */
+    getShareData(url) {
+        try {
+            const matches = this.regex.exec(url);
+            if (!matches || !matches[1]) {
+                console.warn('无效的百度网盘分享链接:', url);
+                return null;
             }
 
-            return false
+            let shareKey = matches[1];
+            // 提取提取码
+            let pwd = '';
+            const pwdMatch = url.match(/提取码[：:](\w{4})|pwd=(\w{4})/);
+            if (pwdMatch) {
+                pwd = pwdMatch[1] || pwdMatch[2];
+            }
+
+            return {
+                shareKey: shareKey,
+                pwd: pwd
+            };
         } catch (error) {
-            console.error('登录百度网盘失败:', error)
-            return false
+            console.error('解析分享链接失败:', error);
+            return null;
         }
     }
 
-    async saveAuth() {
-        if (!this.cookie) return
-
-        await UZUtils.setStorage({
-            key: this.authKey,
-            value: this.cookie,
-            uzTag: this.uzTag
-        })
-    }
-
-    async clearAuth() {
-        this.cookie = ''
-        await UZUtils.setStorage({
-            key: this.authKey,
-            value: '',
-            uzTag: this.uzTag
-        })
-    }
-
-    getRequestHeaders() {
-        return {
-            'Cookie': this.cookie,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Referer': 'https://pan.baidu.com/'
-        }
-    }
-
-    // ... 其他原有方法保持不变 ...
-
-    async getPlayUrl(item) {
-        const playData = new PanPlayInfo()
+    /**
+     * 获取分享链接中的文件列表
+     * @param {string} shareUrl 分享链接
+     * @returns {Promise<string>} JSON格式的文件列表数据
+     */
+    async getFilesByShareUrl(shareUrl) {
+        const data = new PanListDetail();
 
         try {
-            // 检查Cookie有效性
-            if (!this.cookie) {
-                playData.error = '未设置百度网盘Cookie，请先在环境变量中设置'
-                return JSON.stringify(playData)
+            const shareData = this.getShareData(shareUrl);
+            if (!shareData) {
+                data.error = '无效的分享链接';
+                return JSON.stringify(data);
             }
 
-            const isValid = await this.validateCookie()
-            if (!isValid) {
-                playData.error = '百度网盘Cookie已失效，请重新登录'
-                return JSON.stringify(playData)
+            // 获取分享信息
+            const shareInfo = await this.getShareInfo(shareData.shareKey, shareData.pwd);
+            if (!shareInfo || shareInfo.errno !== 0) {
+                data.error = shareInfo?.errmsg || '获取分享信息失败';
+                return JSON.stringify(data);
+            }
+
+            this.fileName = shareInfo.data?.share_title || '百度网盘分享';
+
+            // 获取文件列表
+            const fileList = await this.getFileList(
+                shareData.shareKey,
+                shareInfo.data?.uk,
+                shareInfo.data?.shareid,
+                '0' // 根目录
+            );
+
+            // 过滤视频文件
+            const videos = await this.filterVideos(
+                fileList,
+                shareData.shareKey,
+                shareInfo.data?.uk,
+                shareInfo.data?.shareid
+            );
+
+            // 转换为PanVideoItem格式
+            this.convertToVideoItems(videos, shareInfo.data, data);
+
+        } catch (error) {
+            console.error('获取分享文件列表失败:', error);
+            data.error = error.toString();
+        }
+
+        return JSON.stringify(data);
+    }
+
+    /**
+     * 过滤视频文件并处理子目录
+     */
+    async filterVideos(fileList, shareKey, uk, shareid) {
+        const videos = [];
+
+        // 限制递归深度
+        const maxDepth = 3;
+        const processItems = async (items, depth = 0) => {
+            for (const item of items) {
+                if (depth > maxDepth) continue;
+
+                if (item.isdir === 1) {
+                    // 如果是目录，递归获取子目录文件
+                    try {
+                        const subFiles = await this.getFileList(shareKey, uk, shareid, item.fs_id);
+                        await processItems(subFiles, depth + 1);
+                    } catch (error) {
+                        console.error(`获取子目录文件失败: ${item.path}`, error);
+                    }
+                } else if (item.category === 3) { // 3表示视频
+                    videos.push(item);
+                }
+            }
+        };
+
+        await processItems(fileList);
+        return videos;
+    }
+
+    /**
+     * 将视频文件转换为PanVideoItem格式
+     */
+    convertToVideoItems(videos, shareInfo, data) {
+        for (const video of videos) {
+            let size = video.size / 1024 / 1024;
+            let unit = 'MB';
+            if (size >= 1000) {
+                size = size / 1024;
+                unit = 'GB';
+            }
+            size = size.toFixed(1);
+
+            const videoItem = new PanVideoItem();
+            videoItem.data = {
+                fs_id: video.fs_id,
+                shareid: shareInfo?.shareid,
+                uk: shareInfo?.uk,
+                sign: shareInfo?.sign,
+                timestamp: shareInfo?.timestamp,
+                server_filename: video.server_filename,
+                path: video.path
+            };
+            videoItem.panType = PanType.Baidu;
+            videoItem.name = video.server_filename;
+            videoItem.remark = `[${size}${unit}]`;
+            data.videos.push(videoItem);
+        }
+    }
+
+    /**
+     * 获取分享信息
+     */
+    async getShareInfo(shareKey, pwd = '') {
+        try {
+            const resp = await axios.post(
+                `${this.shareApiUrl}verify?surl=${shareKey}`, {
+                    pwd: pwd,
+                    vcode: '',
+                    vcode_str: ''
+                }, {
+                    headers: {
+                        ...this.defaultHeaders,
+                        'Referer': `https://pan.baidu.com/s/${shareKey}`
+                    },
+                    timeout: 8000
+                }
+            );
+
+            if (resp.data?.errno !== 0) {
+                console.error('获取分享信息失败:', resp.data?.errmsg);
+            }
+            return resp.data;
+        } catch (error) {
+            console.error('获取分享信息请求失败:', error);
+            throw new Error('获取分享信息失败: ' + error.message);
+        }
+    }
+
+    /**
+     * 获取文件列表
+     */
+    async getFileList(shareKey, uk, shareid, dir) {
+        try {
+            const resp = await axios.get(
+                `${this.shareApiUrl}list?uk=${uk}&shareid=${shareid}&dir=${encodeURIComponent(dir)}&surl=${shareKey}`, {
+                    headers: {
+                        ...this.defaultHeaders,
+                        'Referer': `https://pan.baidu.com/s/${shareKey}`
+                    },
+                    timeout: 10000
+                }
+            );
+
+            if (resp.data?.errno !== 0) {
+                console.error('获取文件列表失败:', resp.data?.errmsg);
+                return [];
+            }
+            return resp.data.list || [];
+        } catch (error) {
+            console.error('获取文件列表请求失败:', error);
+            throw new Error('获取文件列表失败: ' + error.message);
+        }
+    }
+
+    /**
+     * 获取播放URL
+     */
+    async getPlayUrl(item) {
+        const playData = new PanPlayInfo();
+
+        try {
+            if (!this.cookie) {
+                playData.error = '请先在环境变量中设置百度网盘Cookie';
+                return JSON.stringify(playData);
             }
 
             // 获取下载链接
-            const dlink = await this.getDownloadLink(item.data)
+            const dlink = await this.getDownloadLink(item.data);
             if (!dlink) {
-                playData.error = '获取下载链接失败，请检查文件是否有效'
-                return JSON.stringify(playData)
+                playData.error = '获取下载链接失败';
+                return JSON.stringify(playData);
             }
 
-            playData.url = dlink
+            playData.url = dlink;
             playData.urls = [{
                 url: dlink,
                 name: '原画',
-                headers: this.getRequestHeaders(),
+                headers: {
+                    ...this.defaultHeaders,
+                    'Cookie': this.cookie,
+                    'Referer': 'https://pan.baidu.com/'
+                },
                 priority: 9999
-            }]
+            }];
 
         } catch (error) {
-            playData.error = '获取播放地址失败: ' + error.toString()
+            console.error('获取播放URL失败:', error);
+            playData.error = error.toString();
         }
 
-        return JSON.stringify(playData)
+        return JSON.stringify(playData);
+    }
+
+    /**
+     * 获取下载链接
+     */
+    async getDownloadLink(fileData) {
+        try {
+            const resp = await axios.get(
+                `${this.apiUrl}sharedownload?app_id=250528&channel=chunlei&clienttype=12&web=1`, {
+                    params: {
+                        sign: fileData.sign,
+                        timestamp: fileData.timestamp,
+                        encrypt: 0,
+                        product: 'share',
+                        uk: fileData.uk,
+                        primaryid: fileData.shareid,
+                        fid: fileData.fs_id
+                    },
+                    headers: {
+                        ...this.defaultHeaders,
+                        'Cookie': this.cookie
+                    },
+                    timeout: 10000
+                }
+            );
+
+            if (resp.data?.errno !== 0) {
+                console.error('获取下载链接失败:', resp.data?.errmsg);
+                return null;
+            }
+            return resp.data.dlink;
+        } catch (error) {
+            console.error('获取下载链接请求失败:', error);
+            throw new Error('获取下载链接失败: ' + error.message);
+        }
     }
 }
 
-//MARK: 网盘扩展统一入口
-/**
- * 网盘工具
- */
+// 网盘扩展统一入口
 class PanTools {
     constructor() {
-        //MARK: 1. 在这里初始化 对应网盘的具体实现对象
-
-        this.quark = new QuarkUC(true)
-        this.uc = new QuarkUC(false)
-        this.pan123 = new Pan123()
-        this.pan189 = new Pan189()
-        this.baidu = new BaiduPan()
-
-        /**
-         * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
-         */
-        this._uzTag = ''
+        this.quark = new QuarkUC(true);
+        this.uc = new QuarkUC(false);
+        this.pan123 = new Pan123();
+        this.pan189 = new Pan189();
+        this.baidu = new BaiduPan();
+        this._uzTag = '';
     }
 
-    /**
-     * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
-     */
     set uzTag(value) {
-        this._uzTag = value
-        this.quark.uzTag = value
-        this.uc.uzTag = value
-        this.pan123.uzTag = value
-        this.pan189.uzTag = value
-        this.baidu.uzTag = value
+        this._uzTag = value;
+        this.quark.uzTag = value;
+        this.uc.uzTag = value;
+        this.pan123.uzTag = value;
+        this.pan189.uzTag = value;
+        this.baidu.uzTag = value;
 
-        this.registerRefreshAllCookie()
-        this.getAllCookie()
-        this.setSaveDirName()
+        this.registerRefreshAllCookie();
+        this.getAllCookie();
+        this.setSaveDirName();
     }
 
     get uzTag() {
-        return this._uzTag
+        return this._uzTag;
     }
 
-    /**
-     * 获取 夸克 UC cookie  ** 无法在 PanTools 外部操作**
-     * 环境变量 key 为 PanType.xx + "Cookie",请在 json 文件中添加
-     * @param {PanType} panType
-     * @returns {@Promise<string>}
-     */
     async getQuarkUCCookie(panType) {
-        const cookie = await this.getPanEnv(panType + 'Cookie')
-        return cookie
+        const cookie = await this.getPanEnv(panType + 'Cookie');
+        return cookie;
     }
 
-    /**
-     * 更新 夸克 UC cookie ** 无法在 PanTools 外部操作**
-     * @param {PanType} panType
-     * @param {string} cookie
-     */
     async updateQuarkUCCookie(panType, cookie) {
-        await this.setPanEnv(panType + 'Cookie', cookie)
+        await this.setPanEnv(panType + 'Cookie', cookie);
     }
 
-    /**
-     * 统一获取环境变量
-     * @param {string} envKey
-     * @returns
-     */
     async getPanEnv(envKey) {
-        const env = await getEnv(this.uzTag, envKey)
-        return env
+        const env = await getEnv(this.uzTag, envKey);
+        return env;
     }
 
-    /**
-     * 统一设置环境变量
-     * @param {string} envKey
-     * @param {string} envValue
-     * @returns
-     */
     async setPanEnv(envKey, envValue) {
-        await setEnv(this.uzTag, envKey, envValue)
+        await setEnv(this.uzTag, envKey, envValue);
     }
 
     async registerRefreshAllCookie() {
-        //MARK: 1.1 请实现 refreshCookie
-        const that = this
-        /// 更新 Quark cookie
+        const that = this;
         this.quark.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.Quark, this.cookie)
-        }
-        /// 更新 UC cookie
+            that.updateQuarkUCCookie(PanType.Quark, this.cookie);
+        };
         this.uc.updateCookie = function() {
-            that.updateQuarkUCCookie(PanType.UC, this.cookie)
-        }
+            that.updateQuarkUCCookie(PanType.UC, this.cookie);
+        };
     }
 
     async getAllCookie() {
-        //MARK: 1.2 请给 cookie 赋值
+        const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? '';
+        this.quark.cookie = quarkCookie;
 
-        const quarkCookie = (await this.getQuarkUCCookie(PanType.Quark)) ?? ''
-        this.quark.cookie = quarkCookie
+        const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? '';
+        this.uc.cookie = ucCookie;
 
-        const ucCookie = (await this.getQuarkUCCookie(PanType.UC)) ?? ''
-        this.uc.cookie = ucCookie
+        this.pan123.passport = (await this.getPanEnv(PanType.Pan123 + '账号')) ?? '';
+        this.pan123.password = (await this.getPanEnv(PanType.Pan123 + '密码')) ?? '';
 
-        this.pan123.passport =
-            (await this.getPanEnv(PanType.Pan123 + '账号')) ?? ''
-        this.pan123.password =
-            (await this.getPanEnv(PanType.Pan123 + '密码')) ?? ''
-
-        this.pan189.account =
-            (await this.getPanEnv(PanType.Pan189 + '账号')) ?? ''
-        this.pan189.password =
-            (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
-
-        this.BaiduPan.account = (await this.getPanEnv(PanType.BaiduPan + '账号')) ?? '';
-        this.BaiduPan.password = (await this.getPanEnv(PanType.BaiduPan + '密码')) ?? '';
+        this.pan189.account = (await this.getPanEnv(PanType.Pan189 + '账号')) ?? '';
+        this.pan189.password = (await this.getPanEnv(PanType.Pan189 + '密码')) ?? '';
+        this.baidu.cookie = (await this.getPanEnv(PanType.Baidu + 'Cookie')) ?? '';
+        await this.baidu.init();
     }
 
-    /**
-     * 设置用户指定的转存文件夹名称
-     */
     async setSaveDirName() {
-        var dirName = await getEnv(this.uzTag, '转存文件夹名称')
-
+        let dirName = await getEnv(this.uzTag, '转存文件夹名称');
         if (dirName == null || dirName === '') {
-            dirName = 'uz影视'
-            await setEnv(this.uzTag, '转存文件夹名称', dirName)
+            dirName = 'uz影视';
+            await setEnv(this.uzTag, '转存文件夹名称', dirName);
         }
-        //MARK: 2. 请补充自定义转存文件夹名称
-        this.quark.saveDirName = dirName
-        this.uc.saveDirName = dirName
+        this.quark.saveDirName = dirName;
+        this.uc.saveDirName = dirName;
     }
 
-    /**
-     * 清理转存文件夹
-     */
     async cleanSaveDir() {
-        //MARK: 3. 请实现清理转存文件夹
-        await this.quark.clearSaveDir()
-        await this.uc.clearSaveDir()
+        await this.quark.clearSaveDir();
+        await this.uc.clearSaveDir();
     }
 
-    /**
-     * 获取网盘资源列表
-     * @param {string} shareUrl
-     * @returns {@Promise<PanListDetail>}
-     */
     async getShareVideos(shareUrl) {
-        //MARK: 4. 请实现获取网盘资源列表
         if (shareUrl.includes('https://pan.quark.cn')) {
-            const data = await this.quark.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
+            const data = await this.quark.getFilesByShareUrl(shareUrl);
+            return JSON.stringify(data);
         } else if (shareUrl.includes('https://drive.uc.cn')) {
-            shareUrl = shareUrl.split('?')[0]
-            const data = await this.uc.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
+            shareUrl = shareUrl.split('?')[0];
+            const data = await this.uc.getFilesByShareUrl(shareUrl);
+            return JSON.stringify(data);
         } else if (this.pan123.getShareData(shareUrl) != null) {
-            const data = await this.pan123.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
+            const data = await this.pan123.getFilesByShareUrl(shareUrl);
+            return JSON.stringify(data);
         } else if (shareUrl.includes('189.cn')) {
-            const data = await this.pan189.getShareData(shareUrl)
-            return JSON.stringify(data)
-        } else if (shareUrl.includes('https://pan.baidu.com')) {
-            const data = await this.baidu.getFilesByShareUrl(shareUrl)
-            return JSON.stringify(data)
+            const data = await this.pan189.getShareData(shareUrl);
+            return JSON.stringify(data);
+        } else if (shareUrl.includes('baidu.com')) {
+            const data = await this.baidu.getFilesByShareUrl(shareUrl);
+            return JSON.stringify(data);
         }
 
-        const data = new PanListDetail()
-        data.error = ''
-
-        return JSON.stringify(data)
+        const data = new PanListDetail();
+        data.error = '';
+        return JSON.stringify(data);
     }
 
-    /**
-     * 获取播放信息
-     * @param {PanVideoItem} item
-     * @returns {@Promise<PanPlayInfo>}
-     */
     async getPlayInfo(item) {
-        //MARK: 5. 请实现获取播放信息
-        await this.getAllCookie()
+        await this.getAllCookie();
         if (item.panType === PanType.Quark) {
-            const data = await this.quark.getPlayUrl(item.data)
-            return JSON.stringify(data)
+            const data = await this.quark.getPlayUrl(item.data);
+            return JSON.stringify(data);
         } else if (item.panType === PanType.UC) {
-            const data = await this.uc.getPlayUrl(item.data)
-            return JSON.stringify(data)
+            const data = await this.uc.getPlayUrl(item.data);
+            return JSON.stringify(data);
         } else if (item.panType === PanType.Pan123) {
-            const data = await this.pan123.getPlayUrl(item.data)
-            return JSON.stringify(data)
+            const data = await this.pan123.getPlayUrl(item.data);
+            return JSON.stringify(data);
         } else if (item.panType === PanType.Pan189) {
-            const data = await this.pan189.getPlayUrl(item.data)
-            return JSON.stringify(data)
+            const data = await this.pan189.getPlayUrl(item.data);
+            return JSON.stringify(data);
         } else if (item.panType === PanType.Baidu) {
-            const data = await this.baidu.getPlayUrl(item)
-            return JSON.stringify(data)
+            const data = await this.baidu.getPlayUrl(item);
+            return JSON.stringify(data);
         }
 
-        const data = new PanPlayInfo()
-        data.error = '暂不支持 ' + item.panType + ' 网盘~'
-        return JSON.stringify(data)
+        const data = new PanPlayInfo();
+        data.error = '暂不支持 ' + item.panType + ' 网盘~';
+        return JSON.stringify(data);
     }
 
-    //MARK: - 伪挂载相关  分页大小建议为200
-
-    /**
-     * 返回支持挂载的网盘
-     * @returns {@Promise<[PanMount]>}
-     */
     async getSupportMountPan() {
-        await this.getAllCookie()
-        let x = formatBackData([
+        await this.getAllCookie();
+        return formatBackData([
             new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
             new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
             new PanMount('百度网盘', PanType.Baidu, this.baidu.cookie !== ''),
-        ])
-
-        return x
+        ]);
     }
 
-    /**
-     * 获取网盘根目录
-     * @param {PanType} panType
-     * @returns {@Promise<{data:[PanMountListData],error:string}>}
-     */
     async getRootDir(panType) {
-        let list = []
+        let list = [];
         try {
             if (panType == PanType.Quark) {
                 list = await this.quark.getFileList({
                     pdir_fid: '0',
                     page: 1,
-                })
+                });
             } else if (panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: '0',
                     page: 1,
-                })
+                });
             }
         } catch (error) {}
         return formatBackData({
             data: list,
             error: ''
-        })
+        });
     }
 
-    /**
-     * 获取网盘挂载子目录
-     * @param {object} args
-     * @param {PanMountListData} args.data
-     * @param {number} args.page
-     * @returns {@Promise<{data:[PanMountListData],error:string}>}
-     */
     async getMountDir(args) {
-        let list = []
+        let list = [];
         try {
             if (args.data.panType == PanType.Quark) {
                 list = await this.quark.getFileList({
                     pdir_fid: args.data.data.fid,
                     page: args.page,
-                })
+                });
             } else if (args.data.panType == PanType.UC) {
                 list = await this.uc.getFileList({
                     pdir_fid: args.data.data.fid,
                     page: args.page,
-                })
+                });
             }
         } catch (error) {}
 
         return formatBackData({
             data: list,
             error: ''
-        })
+        });
     }
 
-    /**
-     * 获取网盘挂载文件真实地址
-     * @param {PanMountListData} args
-     * @returns {@Promise<PanPlayInfo>}
-     */
     async getMountFile(args) {
-        let playData = new PanPlayInfo()
+        let playData = new PanPlayInfo();
 
         try {
             if (args.panType == PanType.Quark) {
@@ -2429,48 +2515,44 @@ class PanTools {
                     const urls = await this.quark.getVideoPlayUrl({
                         fileId: args.data.fid,
                         isMount: true,
-                    })
-                    playData.urls = urls
+                    });
+                    playData.urls = urls;
                 } else if (args.dataType == PanDataType.Unknown) {
                     const urls = await this.quark.getDownload({
                         fileId: args.data.fid,
                         isMount: true,
-                    })
-                    playData.urls = urls
+                    });
+                    playData.urls = urls;
                 }
-                playData.playHeaders = this.quark.playHeaders
-                playData.urls.sort((a, b) => {
-                    return b.priority - a.priority
-                })
+                playData.playHeaders = this.quark.playHeaders;
+                playData.urls.sort((a, b) => b.priority - a.priority);
             } else if (args.panType == PanType.UC) {
                 if (args.dataType == PanDataType.Video) {
                     const urls = await this.uc.getVideoPlayUrl({
                         fileId: args.data.fid,
                         isMount: true,
-                    })
-                    playData.urls = urls
+                    });
+                    playData.urls = urls;
                 } else if (args.dataType == PanDataType.Unknown) {
                     const urls = await this.uc.getDownload({
                         fileId: args.data.fid,
                         isMount: true,
-                    })
-                    playData.urls = urls
+                    });
+                    playData.urls = urls;
                 }
-                playData.playHeaders = this.uc.playHeaders
-                playData.urls.sort((a, b) => {
-                    return b.priority - a.priority
-                })
+                playData.playHeaders = this.uc.playHeaders;
+                playData.urls.sort((a, b) => b.priority - a.priority);
             }
         } catch (error) {
-            playData.error = error.toString()
+            playData.error = error.toString();
         }
         if (playData.urls.length > 0) {
-            playData.url = playData.urls[0].url
+            playData.url = playData.urls[0].url;
         }
 
-        return formatBackData(playData)
+        return formatBackData(playData);
     }
 }
 
 // 固定实例名称
-const uzPanToolsInstance = new PanTools()
+const uzPanToolsInstance = new PanTools();
