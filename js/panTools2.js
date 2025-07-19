@@ -330,11 +330,9 @@ class QuarkUC {
         return {
             cookie: cookie,
             Referer: this.isQuark ?
-                'https://pan.quark.cn/' :
-                'https://drive.uc.cn/',
+                'https://pan.quark.cn/' : 'https://drive.uc.cn/',
             'User-Agent': this.isQuark ?
-                '' :
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
+                '' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) uc-cloud-drive/1.8.6 Chrome/100.0.4896.160 Electron/18.3.5.16-b62cf9c50d Safari/537.36 Channel/ucpan_other_ch',
         }
     }
     fileName = ''
@@ -928,9 +926,7 @@ class QuarkUC {
         try {
             const down = await this.api(
                 `file/download?${this.pr}&uc_param_str=`, {
-                    fids: isMount ?
-                        [args.fileId] :
-                        [this.saveFileIdCaches[args.fileId]],
+                    fids: isMount ? [args.fileId] : [this.saveFileIdCaches[args.fileId]],
                 }
             )
             if (
@@ -1454,7 +1450,6 @@ class Pan123 {
 
 //189云盘
 // 抄自 https://github.com/hjdhnx/drpy-node/
-
 class Pan189 {
     constructor() {
         this.regex = /https:\/\/cloud\.189\.cn\/web\/share\?code=([^&]+)/ //https://cloud.189.cn/web/share?code=qI3aMjqYRrqa
@@ -1595,9 +1590,9 @@ class Pan189 {
 
                 cookies +=
                     '; ' +
-                    resp.headers?.['set-cookie']
-                    ?.map((it) => it.split(';')[0])
-                    .join(';') ?? ''
+                    (resp.headers?.['set-cookie']
+                        ?.map((it) => it.split(';')[0])
+                        .join(';') ?? '')
                 this.cookie = cookies
 
                 await UZUtils.setStorage({
@@ -1629,20 +1624,19 @@ class Pan189 {
             const matches = this.regex.exec(url)
             if (matches && matches[1]) {
                 this.shareCode = matches[1]
-                const accessCodeMatch =
-                    this.shareCode.match(/访问码：([a-zA-Z0-9]+)/)
-                this.accessCode = accessCodeMatch ? accessCodeMatch[1] : ''
             } else {
                 const matches_ = url.match(
                     /https:\/\/cloud\.189\.cn\/t\/([^&]+)/
                 )
                 this.shareCode = matches_ ? matches_[1] : null
-                const accessCodeMatch =
-                    this.shareCode.match(/访问码：([a-zA-Z0-9]+)/)
-                this.accessCode = accessCodeMatch ? accessCodeMatch[1] : ''
             }
-            if (accessCode) {
+
+            // 处理访问码
+            if (accessCode && accessCode.length > 0) {
                 this.accessCode = accessCode
+            } else {
+                const accessCodeMatch = url.match(/访问码：([a-zA-Z0-9]+)/)
+                this.accessCode = accessCodeMatch ? accessCodeMatch[1] : ''
             }
         } catch (error) {}
     }
@@ -1728,8 +1722,13 @@ class Pan189 {
                 await this.getShareID(shareUrl, accessCode)
             } else {
                 this.shareCode = shareUrl
+                if (accessCode && accessCode.length > 0) {
+                    this.accessCode = accessCode
+                }
             }
-            if (accessCode) {
+
+            // 如果有访问码，先验证
+            if (this.accessCode && this.accessCode.length > 0) {
                 let check = await axios.get(
                     `${this.api}/open/share/checkAccessCode.action?shareCode=${this.shareCode}&accessCode=${this.accessCode}`, {
                         headers: this.normalHeaders,
@@ -1738,37 +1737,26 @@ class Pan189 {
                 if (check.status === 200) {
                     this.shareId = check.data.shareId
                 }
-                let resp = await axios.get(
-                    `${this.api}/open/share/getShareInfoByCodeV2.action?key=noCache&shareCode=${this.shareCode}`, {
-                        headers: this.normalHeaders,
-                    }
-                )
-                let fileId = resp.data.fileId
-                this.shareMode = resp.data.shareMode
-                this.isFolder = resp.data.isFolder
-                if (this.fileName.length < 1) {
-                    this.fileName = resp.data.fileName
-                }
-                return fileId
-            } else {
-                const url = `${
-                    this.api
-                }/open/share/getShareInfoByCodeV2.action?noCache=${Math.random()}&shareCode=${
-                    this.shareCode
-                }`
-                let resp = await axios.get(url, {
-                    headers: this.normalHeaders,
-                })
-                let fileId = resp.data.fileId
-                this.shareId = resp.data.shareId
-
-                this.shareMode = resp.data.shareMode
-                this.isFolder = resp.data.isFolder
-                if (this.fileName.length < 1) {
-                    this.fileName = resp.data.fileName
-                }
-                return fileId
             }
+
+            const url = `${this.api}/open/share/getShareInfoByCodeV2.action?noCache=${Math.random()}&shareCode=${this.shareCode}`
+            let resp = await axios.get(url, {
+                headers: this.normalHeaders,
+            })
+
+            let fileId = resp.data.fileId
+            this.shareMode = resp.data.shareMode
+            this.isFolder = resp.data.isFolder
+            if (this.fileName.length < 1) {
+                this.fileName = resp.data.fileName
+            }
+
+            // 如果之前没有获取到shareId，尝试从这里获取
+            if (!this.shareId && resp.data.shareId) {
+                this.shareId = resp.data.shareId
+            }
+
+            return fileId
         } catch (error) {
             console.error('Error during getShareInfo:', error)
         }
@@ -1830,15 +1818,7 @@ class Pan189 {
                 responseType: ReqResponseType.plain,
             }
             const pageSize = 60
-            const url = `${
-                this.api
-            }/open/share/listShareDir.action?key=noCache&pageNum=${pageNum}&pageSize=${pageSize}&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${
-                this.isFolder
-            }&shareId=${this.shareId}&shareMode=${
-                this.shareMode
-            }&iconOption=5&orderBy=filename&descending=false&accessCode=${
-                this.accessCode
-            }&noCache=${Math.random()}`
+            const url = `${this.api}/open/share/listShareDir.action?key=noCache&pageNum=${pageNum}&pageSize=${pageSize}&fileId=${fileId}&shareDirFileId=${fileId}&isFolder=${this.isFolder}&shareId=${this.shareId}&shareMode=${this.shareMode}&iconOption=5&orderBy=filename&descending=false&accessCode=${this.accessCode}&noCache=${Math.random()}`
 
             let resp = await req(url, options)
 
@@ -1922,26 +1902,29 @@ class Pan189 {
                     headers: headers,
                 }
             )
+
             if (resp.status !== 200 && this.index < 2) {
                 this.cookie = ''
                 this.index += 1
                 return await this.getShareUrl(fileId, shareId)
             }
 
-            let location = await axios.get(resp.data.normal.url, {
-                maxRedirects: 0, // 禁用自动重定向
-            })
+            let link = resp.data.normal.url;
 
-            let link = ''
-            if (
-                location.status >= 300 &&
-                location.status < 400 &&
-                location.headers.location
-            ) {
-                link = location.headers.location
-            } else {
-                link = resp.data.normal.url
+            // 尝试获取重定向后的URL
+            try {
+                let location = await axios.get(link, {
+                    maxRedirects: 0,
+                    validateStatus: (status) => status >= 200 && status < 400
+                });
+
+                if (location.status >= 300 && location.status < 400 && location.headers.location) {
+                    link = location.headers.location;
+                }
+            } catch (e) {
+                console.log('获取重定向URL失败，使用原始URL');
             }
+
             this.index = 0
             return link
         } catch (error) {
@@ -1955,14 +1938,11 @@ class Pan189 {
                 return await this.getShareUrl(fileId, shareId)
             } else {
                 console.error(
-                    'Error during getShareUrl:', {
-                        message: error.message,
-                        status: error.response?.status || 'N/A',
-                        url: error.config?.url || 'N/A', // 请求的URL
-                        method: error.config?.method || 'N/A', // 请求方法
-                        data: error.response?.data || 'N/A' // 服务器返回的具体错误信息
-                    }
-                );
+                    'Error during getShareUrl:',
+                    error.message,
+                    error.response ? error.response.status : 'N/A'
+                )
+                throw error;
             }
         } finally {
             if (this.index >= 2) {
@@ -1971,6 +1951,7 @@ class Pan189 {
         }
     }
 }
+
 
 //MARK: 网盘扩展统一入口
 /**
