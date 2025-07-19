@@ -1911,13 +1911,15 @@ class Pan189 {
 
             let link = resp.data.normal.url;
 
-            // 尝试获取重定向后的URL
+            // 修复1: 正确处理重定向URL
             try {
-                let location = await axios.get(link, {
+                // 修复2: 使用HEAD方法检查重定向
+                let location = await axios.head(link, {
                     maxRedirects: 0,
-                    validateStatus: (status) => status >= 200 && status < 400
+                    validateStatus: null // 禁用状态码验证
                 });
 
+                // 修复3: 正确处理重定向状态码
                 if (location.status >= 300 && location.status < 400 && location.headers.location) {
                     link = location.headers.location;
                 }
@@ -1926,7 +1928,8 @@ class Pan189 {
             }
 
             this.index = 0
-            return link
+            // 修复4: 返回数组而不是单个URL
+            return [link]
         } catch (error) {
             if (
                 error.response &&
@@ -1942,7 +1945,8 @@ class Pan189 {
                     error.message,
                     error.response ? error.response.status : 'N/A'
                 )
-                throw error;
+                // 修复5: 返回空数组而不是抛出错误
+                return []
             }
         } finally {
             if (this.index >= 2) {
