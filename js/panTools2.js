@@ -67,11 +67,6 @@ const PanType = {
      * 天翼网盘
      */
     Pan189: '天翼网盘',
-
-    /**
-     *  解析
-     */
-    JieXi: '采集解析',
 }
 
 /**
@@ -1943,133 +1938,6 @@ class Pan189 {
     }
 }
 
-// 解析
-class JieXi {
-    uzTag = ''
-
-    static isJieXiUrl(url) {
-        return (
-            url.includes('v.qq.com') ||
-            url.includes('iqiyi.com') ||
-            url.includes('youku.com') ||
-            url.includes('mgtv.com') ||
-            url.includes('bilibili.com')
-        )
-    }
-
-    getTypeName(url) {
-        if (url.includes('v.qq.com')) {
-            return 'TX'
-        } else if (url.includes('iqiyi.com')) {
-            return 'IQY'
-        } else if (url.includes('youku.com')) {
-            return 'YK'
-        } else if (url.includes('mgtv.com')) {
-            return 'MGTV'
-        } else if (url.includes('bilibili.com')) {
-            return 'Bili'
-        } else {
-            return '未知'
-        }
-    }
-
-    async getVideoList(url) {
-        // 第一集$第一集的视频详情链接#第二集$第二集的视频详情链接$$$第一集$第一集的视频详情链接#第二集$第二集的视频详情链接
-        let list = url.split('$$$')
-        let videos = []
-        for (let i = 0; i < list.length; i++) {
-            const oneFrom = list[i]
-            const fromName = this.getTypeName(oneFrom)
-            let videoList = oneFrom.split('#')
-
-            for (let j = 0; j < videoList.length; j++) {
-                const element = videoList[j]
-                let video = element.split('$')
-                if (video.length === 2) {
-                    let title = video[0]
-                    let url = video[1]
-                    videos.push({
-                        name: title,
-                        fromName: fromName,
-                        panType: PanType.JieXi,
-                        data: {
-                            url: url,
-                        },
-                    })
-                } else if (video[0] === url) {
-                    videos.push({
-                        name: '解析',
-                        fromName: fromName,
-                        panType: PanType.JieXi,
-                        data: {
-                            url: url,
-                        },
-                    })
-                }
-            }
-        }
-
-        return {
-            videos: videos,
-            //TODO: 推送只有一个链接的 获取视频名称 给 fileName
-            fileName: this.fileName,
-            error: '',
-        }
-    }
-
-    async getPlayUrl(data) {
-        let url = data.url
-        // 格式：名称1@地址1;名称2@地址2
-        let allUrls = await getEnv(this.uzTag, '采集解析地址')
-        if (allUrls.length < 1) {
-            allUrls =
-                '钓鱼@http://8.129.30.117:8117/diaoyu.php?url=;乌贼@http://jx.dedyn.io/?url='
-            await setEnv(this.uzTag, '采集解析地址', allUrls)
-        }
-        const jxLinks = allUrls.split(';')
-        const urls = []
-        for (let index = 0; index < jxLinks.length; index++) {
-            const element = jxLinks[index]
-            const name = element.split('@')[0]
-            const api = element.split('@')[1]
-            const response = await req(api + url)
-
-            if (response.code === 200) {
-                let item
-                try {
-                    item = JSON.parse(response.data)
-                } catch (error) {
-                    item = response.data
-                }
-                if (item) {
-                    for (let key in item) {
-                        if (item.hasOwnProperty(key)) {
-                            let value = item[key]
-                            if (value && typeof value === 'string') {
-                                if (
-                                    value.includes('http') &&
-                                    (value.includes('m3u8') ||
-                                        value.includes('mp4'))
-                                ) {
-                                    urls.push({
-                                        url: value,
-                                        name: name,
-                                    })
-                                    continue
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return {
-            urls: urls,
-            headers: {},
-        }
-    }
-}
-
 //MARK: 网盘扩展统一入口
 /**
  * 网盘工具
@@ -2082,7 +1950,6 @@ class PanTools {
         this.uc = new QuarkUC(false)
         this.pan123 = new Pan123()
         this.pan189 = new Pan189()
-        this.jieXi = new JieXi()
 
         /**
          * 扩展运行标识 ** uzApp 运行时自动赋值，请勿修改 **
@@ -2099,7 +1966,6 @@ class PanTools {
         this.uc.uzTag = value
         this.pan123.uzTag = value
         this.pan189.uzTag = value
-        this.jieXi.uzTag = value
 
         this.registerRefreshAllCookie()
         this.getAllCookie()
@@ -2229,9 +2095,6 @@ class PanTools {
         } else if (shareUrl.includes('189.cn')) {
             const data = await this.pan189.getShareData(shareUrl)
             return JSON.stringify(data)
-        } else if (JieXi.isJieXiUrl(shareUrl)) {
-            const data = await this.jieXi.getVideoList(shareUrl)
-            return JSON.stringify(data)
         }
 
         const data = new PanListDetail()
@@ -2259,9 +2122,6 @@ class PanTools {
             return JSON.stringify(data)
         } else if (item.panType === PanType.Pan189) {
             const data = await this.pan189.getPlayUrl(item.data)
-            return JSON.stringify(data)
-        } else if (item.panType === PanType.JieXi) {
-            const data = await this.jieXi.getPlayUrl(item.data)
             return JSON.stringify(data)
         }
 
