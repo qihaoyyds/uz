@@ -1,7 +1,8 @@
 //@name:网盘解析工具
 //@version:25
 //@remark:iOS14 以上版本可用,App v1.6.54 及以上版本可用
-//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&百度Cookie##用于播放百度网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&采集解析地址##内置两个，失效不要反馈。格式：名称1@地址1;名称2@地址2
+//@env:UCCookie##用于播放UC网盘视频&&UC_UT##播放视频自动获取，不可用时点击删除重新获取 cookie ，再重启app&&夸克Cookie##用于播放Quark网盘视频&&阿里Token##用于播放阿里网盘视频&&转存文件夹名称##在各网盘转存文件时使用的文件夹名称&&123网盘账号##用于播放123网盘视频&&123网盘密码##用于播放123网盘视频&&百度Cookie##用于播放百度网盘视频&&天翼网盘账号##用于播放天翼网盘视频&&天翼网盘密码##用于播放天翼网盘视频&&百度Cookie##用于播放百度网盘视频&&BDUSS##百度账号认证信息&&STOKEN##百度账号安全令牌
+
 // ignore
 import {
     FilterLabel,
@@ -1181,61 +1182,61 @@ class Pan123 {
                     error: '无法解析分享链接',
                 }
             }
-        this.fileName = ''
-        let file = {}
-        let cate = await this.getShareInfo(shareKey, this.SharePwd, 0, 0)
+            this.fileName = ''
+            let file = {}
+            let cate = await this.getShareInfo(shareKey, this.SharePwd, 0, 0)
 
-        if (cate && Array.isArray(cate)) {
-            await Promise.all(
-                cate.map(async (item) => {
-                    if (!(item.filename in file)) {
-                        file[item.filename] = []
-                    }
+            if (cate && Array.isArray(cate)) {
+                await Promise.all(
+                    cate.map(async (item) => {
+                        if (!(item.filename in file)) {
+                            file[item.filename] = []
+                        }
 
-                    const fileData = await this.getShareList(
-                        item.shareKey,
-                        item.SharePwd,
-                        item.next,
-                        item.fileId
-                    )
+                        const fileData = await this.getShareList(
+                            item.shareKey,
+                            item.SharePwd,
+                            item.next,
+                            item.fileId
+                        )
 
-                    if (fileData && fileData.length > 0) {
-                        file[item.filename].push(...fileData)
-                    }
-                })
-            )
-        }
-
-        let videos = []
-
-        // 过滤掉空数组
-        for (let key in file) {
-            if (file[key].length > 0) {
-                for (let i = 0; i < file[key].length; i++) {
-                    const element = file[key][i]
-                    let size = element.Size / 1024 / 1024
-                    let unit = 'MB'
-                    if (size >= 1000) {
-                        size = size / 1024
-                        unit = 'GB'
-                    }
-                    size = size.toFixed(1)
-                    videos.push({
-                        name: element.FileName,
-                        remark: `[${size}${unit}]`,
-                        panType: PanType.Pan123,
-                        data: element,
-                        fromName: key,
+                        if (fileData && fileData.length > 0) {
+                            file[item.filename].push(...fileData)
+                        }
                     })
+                )
+            }
+
+            let videos = []
+
+            // 过滤掉空数组
+            for (let key in file) {
+                if (file[key].length > 0) {
+                    for (let i = 0; i < file[key].length; i++) {
+                        const element = file[key][i]
+                        let size = element.Size / 1024 / 1024
+                        let unit = 'MB'
+                        if (size >= 1000) {
+                            size = size / 1024
+                            unit = 'GB'
+                        }
+                        size = size.toFixed(1)
+                        videos.push({
+                            name: element.FileName,
+                            remark: `[${size}${unit}]`,
+                            panType: PanType.Pan123,
+                            data: element,
+                            fromName: key,
+                        })
+                    }
                 }
             }
-        }
 
-        return {
-            videos: videos,
-            fileName: this.fileName,
-            error: '',
-        }
+            return {
+                videos: videos,
+                fileName: this.fileName,
+                error: '',
+            }
         } catch (error) {
             return {
                 videos: [],
@@ -1979,23 +1980,30 @@ class BaiduPan {
 
     async init() {
         try {
-            const auth = await UZUtils.getStorage({
-                key: this.authKey,
-                uzTag: this.uzTag
-            })
+            // 优先从环境变量读取Cookie
+            this.cookie = await getEnv(this.uzTag, '百度Cookie');
+            this.bduss = await getEnv(this.uzTag, 'BDUSS');
+            this.stoken = await getEnv(this.uzTag, 'STOKEN');
 
-            if (auth?.length > 0) {
-                this.cookie = auth
-                // 验证cookie是否有效
-                const isValid = await this.validateCookie()
-                if (!isValid) {
-                    await this.clearAuth()
-                }
+            // 环境变量未设置时，回退到本地存储
+            if (!this.cookie) {
+                const auth = await UZUtils.getStorage({
+                    key: this.authKey,
+                    uzTag: this.uzTag
+                });
+                if (auth?.length > 0) this.cookie = auth;
+            }
+
+            // 验证Cookie有效性
+            if (this.cookie) {
+                const isValid = await this.validateCookie();
+                if (!isValid) await this.clearAuth();
             }
         } catch (error) {
-            console.error('百度网盘初始化失败:', error)
+            console.error('初始化失败:', error);
         }
     }
+
 
     async validateCookie() {
         try {
@@ -2170,7 +2178,7 @@ class BaiduPan {
             }]
 
         } catch (error) {
-            playData.error = error.toString()
+            playData.error = `API请求失败: ${error.message}`;
         }
 
         return JSON.stringify(playData)
