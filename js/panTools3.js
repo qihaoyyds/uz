@@ -1979,10 +1979,31 @@ class BaiduPan {
     stoken = ''
 
     async init() {
-        if (this.cookie.length < 1) {
-            this.login(this.account, this.password)
+        try {
+            // 优先从环境变量读取Cookie
+            this.cookie = await getEnv(this.uzTag, '百度Cookie');
+            this.bduss = await getEnv(this.uzTag, 'BDUSS');
+            this.stoken = await getEnv(this.uzTag, 'STOKEN');
+
+            // 环境变量未设置时，回退到本地存储
+            if (!this.cookie) {
+                const auth = await UZUtils.getStorage({
+                    key: this.authKey,
+                    uzTag: this.uzTag
+                });
+                if (auth?.length > 0) this.cookie = auth;
+            }
+
+            // 验证Cookie有效性
+            if (this.cookie) {
+                const isValid = await this.validateCookie();
+                if (!isValid) await this.clearAuth();
+            }
+        } catch (error) {
+            console.error('初始化失败:', error);
         }
     }
+
 
 
     async validateCookie() {
