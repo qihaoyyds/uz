@@ -2020,221 +2020,269 @@ class BaiduPan {
         }
     }
 
-
-
-    async validateCookie() {
+    async getFileListForMount(dir = '/', page = 1) {
         try {
-            const resp = await axios.get('https://pan.baidu.com/api/user/info', {
-                headers: this._getAuthHeaders(),
-                timeout: 5000
-            });
-            return resp.data?.errno === 0;
-        } catch (error) {
-            return false;
-        }
-    }
-
-    _getAuthHeaders() {
-        return {
-            'Cookie': this.cookie,
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Referer': 'https://pan.baidu.com/'
-        };
-    }
-
-    async clearAuth() {
-        this.cookie = '';
-        await UZUtils.setStorage({
-            key: this.authKey,
-            value: '',
-            uzTag: this.uzTag
-        });
-    }
-
-    async clearAuth() {
-        this.cookie = ''
-        await UZUtils.setStorage({
-            key: this.authKey,
-            value: '',
-            uzTag: this.uzTag
-        })
-    }
-
-    getShareData(url) {
-        const matches = this.regex.exec(url)
-        if (!matches || !matches[1]) return null
-
-        let shareKey = matches[1]
-        // 提取提取码
-        let pwd = ''
-        const pwdMatch = url.match(/提取码[：:](\w{4})|pwd=(\w{4})/)
-        if (pwdMatch) {
-            pwd = pwdMatch[1] || pwdMatch[2]
-        }
-
-        return {
-            shareKey: shareKey,
-            pwd: pwd
-        }
-    }
-
-    fileName = ''
-    async getFilesByShareUrl(shareUrl) {
-        const data = new PanListDetail()
-
-        try {
-            const shareData = this.getShareData(shareUrl)
-            if (!shareData) {
-                data.error = '无效的分享链接'
-                return JSON.stringify(data)
-            }
-
-            // 获取分享信息
-            const shareInfo = await this.getShareInfo(shareData.shareKey, shareData.pwd)
-            if (!shareInfo || shareInfo.errno !== 0) {
-                data.error = '获取分享信息失败'
-                return JSON.stringify(data)
-            }
-
-            this.fileName = shareInfo.data?.share_title || '百度网盘分享'
-
-            // 获取文件列表
-            const fileList = await this.getFileList(shareData.shareKey, shareInfo.data?.uk, shareInfo.data?.shareid, '0')
-
-            // 过滤视频文件
-            const videos = []
-            for (const item of fileList) {
-                if (item.isdir === 1) {
-                    // 如果是目录，递归获取子目录文件
-                    const subFiles = await this.getFileList(shareData.shareKey, shareInfo.data?.uk, shareInfo.data?.shareid, item.fs_id)
-                    videos.push(...subFiles.filter(f => f.category === 3)) // 3表示视频
-                } else if (item.category === 3) {
-                    videos.push(item)
-                }
-            }
-
-            // 转换为PanVideoItem格式
-            for (const video of videos) {
-                let size = video.size / 1024 / 1024
-                let unit = 'MB'
-                if (size >= 1000) {
-                    size = size / 1024
-                    unit = 'GB'
-                }
-                size = size.toFixed(1)
-
-                const videoItem = new PanVideoItem()
-                videoItem.data = {
-                    fs_id: video.fs_id,
-                    shareid: shareInfo.data?.shareid,
-                    uk: shareInfo.data?.uk,
-                    sign: shareInfo.data?.sign,
-                    timestamp: shareInfo.data?.timestamp
-                }
-                videoItem.panType = PanType.Baidu
-                videoItem.name = video.server_filename
-                videoItem.remark = `[${size}${unit}]`
-                data.videos.push(videoItem)
-            }
-
-        } catch (error) {
-            data.error = error.toString()
-        }
-
-        return JSON.stringify(data)
-    }
-
-    async getShareInfo(shareKey, pwd = '') {
-        try {
-            const resp = await axios.post(`${this.shareApiUrl}verify?surl=${shareKey}`, {
-                pwd: pwd,
-                vcode: '',
-                vcode_str: ''
-            }, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Referer': `https://pan.baidu.com/s/${shareKey}`
-                }
-            })
-            return resp.data
-        } catch (error) {
-            console.error('获取分享信息失败:', error)
-            return null
-        }
-    }
-
-    async getFileList(shareKey, uk, shareid, dir) {
-        try {
-            const resp = await axios.get(`${this.shareApiUrl}list?uk=${uk}&shareid=${shareid}&dir=${encodeURIComponent(dir)}&surl=${shareKey}`, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Referer': `https://pan.baidu.com/s/${shareKey}`
-                }
-            })
-
-            if (resp.data?.errno === 0) {
-                return resp.data.list || []
-            }
-            return []
-        } catch (error) {
-            console.error('获取文件列表失败:', error)
-            return []
-        }
-    }
-
-    async getPlayUrl(item) {
-        const playData = new PanPlayInfo()
-
-        try {
-            if (!this.cookie) {
-                playData.error = '请先在环境变量中设置百度网盘Cookie'
-                return JSON.stringify(playData)
-            }
-
-            // 获取下载链接
-            const dlink = await this.getDownloadLink(item.data)
-            if (!dlink) {
-                playData.error = '获取下载链接失败'
-                return JSON.stringify(playData)
-            }
-
-            playData.url = dlink
-            playData.urls = [{
-                url: dlink,
-                name: '原画',
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                    'Cookie': this.cookie
-                },
-                priority: 9999
-            }]
-
-        } catch (error) {
-            playData.error = `API请求失败: ${error.message}`;
-        }
-
-        return JSON.stringify(playData)
-    }
-
-    async getDownloadLink(fileData) {
-        try {
-            const resp = await axios.get(`${this.apiUrl}sharedownload?app_id=250528&channel=chunlei&clienttype=12&sign=${fileData.sign}&timestamp=${fileData.timestamp}&web=1`, {
+            const resp = await axios.get('https://pan.baidu.com/api/list', {
                 params: {
-                    encrypt: 0,
-                    product: 'share',
-                    uk: fileData.uk,
-                    primaryid: fileData.shareid,
-                    fid: fileData.fs_id
+                    dir: encodeURIComponent(dir),
+                    page: page,
+                    num: 200, // 每页数量
+                    order: 'time',
+                    desc: 1,
+                    showempty: 0
                 },
                 headers: this._getAuthHeaders()
             });
 
-            return resp.data?.errno === 0 ? resp.data.dlink : null;
+            if (resp.data.errno !== 0) throw new Error(resp.data.errmsg);
+
+            return resp.data.list.map(item => ({
+                path: item.path, // 文件完整路径
+                name: item.server_filename,
+                size: item.size,
+                time: item.server_mtime,
+                isdir: item.isdir, // 是否是目录
+                category: item.category // 文件类型
+            }));
         } catch (error) {
-            console.error('获取下载链接失败:', error);
-            return null;
+            console.error('获取文件列表失败:', error);
+            return [];
         }
     }
+
+    async getMountFileUrl(filePath) {
+        try {
+            const resp = await axios.get('https://pan.baidu.com/api/download', {
+                params: {
+                    path: encodeURIComponent(filePath),
+                    app_id: 250528
+                },
+                headers: this._getAuthHeaders()
+            });
+
+            if (resp.data.errno !== 0) throw new Error(resp.data.errmsg);
+            return resp.data.url;
+        } catch (error) {
+            console.error('获取文件地址失败:', error);
+            return '';
+        }
+    }
+}
+
+
+async validateCookie() {
+    try {
+        const resp = await axios.get('https://pan.baidu.com/api/user/info', {
+            headers: this._getAuthHeaders(),
+            timeout: 5000
+        });
+        return resp.data?.errno === 0;
+    } catch (error) {
+        return false;
+    }
+}
+
+_getAuthHeaders() {
+    return {
+        'Cookie': this.cookie,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://pan.baidu.com/'
+    };
+}
+
+async clearAuth() {
+    this.cookie = '';
+    await UZUtils.setStorage({
+        key: this.authKey,
+        value: '',
+        uzTag: this.uzTag
+    });
+}
+
+async clearAuth() {
+    this.cookie = ''
+    await UZUtils.setStorage({
+        key: this.authKey,
+        value: '',
+        uzTag: this.uzTag
+    })
+}
+
+getShareData(url) {
+    const matches = this.regex.exec(url)
+    if (!matches || !matches[1]) return null
+
+    let shareKey = matches[1]
+    // 提取提取码
+    let pwd = ''
+    const pwdMatch = url.match(/提取码[：:](\w{4})|pwd=(\w{4})/)
+    if (pwdMatch) {
+        pwd = pwdMatch[1] || pwdMatch[2]
+    }
+
+    return {
+        shareKey: shareKey,
+        pwd: pwd
+    }
+}
+
+fileName = ''
+async getFilesByShareUrl(shareUrl) {
+    const data = new PanListDetail()
+
+    try {
+        const shareData = this.getShareData(shareUrl)
+        if (!shareData) {
+            data.error = '无效的分享链接'
+            return JSON.stringify(data)
+        }
+
+        // 获取分享信息
+        const shareInfo = await this.getShareInfo(shareData.shareKey, shareData.pwd)
+        if (!shareInfo || shareInfo.errno !== 0) {
+            data.error = '获取分享信息失败'
+            return JSON.stringify(data)
+        }
+
+        this.fileName = shareInfo.data?.share_title || '百度网盘分享'
+
+        // 获取文件列表
+        const fileList = await this.getFileList(shareData.shareKey, shareInfo.data?.uk, shareInfo.data?.shareid, '0')
+
+        // 过滤视频文件
+        const videos = []
+        for (const item of fileList) {
+            if (item.isdir === 1) {
+                // 如果是目录，递归获取子目录文件
+                const subFiles = await this.getFileList(shareData.shareKey, shareInfo.data?.uk, shareInfo.data?.shareid, item.fs_id)
+                videos.push(...subFiles.filter(f => f.category === 3)) // 3表示视频
+            } else if (item.category === 3) {
+                videos.push(item)
+            }
+        }
+
+        // 转换为PanVideoItem格式
+        for (const video of videos) {
+            let size = video.size / 1024 / 1024
+            let unit = 'MB'
+            if (size >= 1000) {
+                size = size / 1024
+                unit = 'GB'
+            }
+            size = size.toFixed(1)
+
+            const videoItem = new PanVideoItem()
+            videoItem.data = {
+                fs_id: video.fs_id,
+                shareid: shareInfo.data?.shareid,
+                uk: shareInfo.data?.uk,
+                sign: shareInfo.data?.sign,
+                timestamp: shareInfo.data?.timestamp
+            }
+            videoItem.panType = PanType.Baidu
+            videoItem.name = video.server_filename
+            videoItem.remark = `[${size}${unit}]`
+            data.videos.push(videoItem)
+        }
+
+    } catch (error) {
+        data.error = error.toString()
+    }
+
+    return JSON.stringify(data)
+}
+
+async getShareInfo(shareKey, pwd = '') {
+    try {
+        const resp = await axios.post(`${this.shareApiUrl}verify?surl=${shareKey}`, {
+            pwd: pwd,
+            vcode: '',
+            vcode_str: ''
+        }, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Referer': `https://pan.baidu.com/s/${shareKey}`
+            }
+        })
+        return resp.data
+    } catch (error) {
+        console.error('获取分享信息失败:', error)
+        return null
+    }
+}
+
+async getFileList(shareKey, uk, shareid, dir) {
+    try {
+        const resp = await axios.get(`${this.shareApiUrl}list?uk=${uk}&shareid=${shareid}&dir=${encodeURIComponent(dir)}&surl=${shareKey}`, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Referer': `https://pan.baidu.com/s/${shareKey}`
+            }
+        })
+
+        if (resp.data?.errno === 0) {
+            return resp.data.list || []
+        }
+        return []
+    } catch (error) {
+        console.error('获取文件列表失败:', error)
+        return []
+    }
+}
+
+async getPlayUrl(item) {
+    const playData = new PanPlayInfo()
+
+    try {
+        if (!this.cookie) {
+            playData.error = '请先在环境变量中设置百度网盘Cookie'
+            return JSON.stringify(playData)
+        }
+
+        // 获取下载链接
+        const dlink = await this.getDownloadLink(item.data)
+        if (!dlink) {
+            playData.error = '获取下载链接失败'
+            return JSON.stringify(playData)
+        }
+
+        playData.url = dlink
+        playData.urls = [{
+            url: dlink,
+            name: '原画',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Cookie': this.cookie
+            },
+            priority: 9999
+        }]
+
+    } catch (error) {
+        playData.error = `API请求失败: ${error.message}`;
+    }
+
+    return JSON.stringify(playData)
+}
+
+async getDownloadLink(fileData) {
+    try {
+        const resp = await axios.get(`${this.apiUrl}sharedownload?app_id=250528&channel=chunlei&clienttype=12&sign=${fileData.sign}&timestamp=${fileData.timestamp}&web=1`, {
+            params: {
+                encrypt: 0,
+                product: 'share',
+                uk: fileData.uk,
+                primaryid: fileData.shareid,
+                fid: fileData.fs_id
+            },
+            headers: this._getAuthHeaders()
+        });
+
+        return resp.data?.errno === 0 ? resp.data.dlink : null;
+    } catch (error) {
+        console.error('获取下载链接失败:', error);
+        return null;
+    }
+}
 }
 
 
@@ -2297,22 +2345,6 @@ class PanTools {
      */
     async updateQuarkUCCookie(panType, cookie) {
         await this.setPanEnv(panType + 'Cookie', cookie)
-    }
-
-    /**
-     * 获取百度网盘的Cookie
-     * @returns {Promise<string>} Cookie字符串
-     */
-    async getBaiduCookie() {
-        return this.getPanEnv('baiduCookie'); // 使用统一环境变量管理
-    }
-
-    /**
-     * 更新百度网盘的Cookie
-     * @param {string} cookie 
-     */
-    async updateBaiduCookie(cookie) {
-        await this.setPanEnv('baiduCookie', cookie); // 存储到环境变量
     }
 
     /**
