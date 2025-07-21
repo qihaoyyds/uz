@@ -169,8 +169,7 @@ class PanListDetail {
  * 网盘挂载 类型
  */
 class PanMount {
-    constructor(name = '', panType = PanType.UC, isLogin = false) {
-        constructor(name = '', panType = PanType.BaiduPan, isLogin = false)
+    constructor(name = '', panType = PanType.UC, isLogin = false) 
         /**
          * 网盘展示名称
          */
