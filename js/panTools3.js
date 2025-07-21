@@ -1973,8 +1973,8 @@ class BaiduPan {
         this.cookie = ''
         this.authKey = 'baiduPanAuth'
         this.cookiePatterns = [
-            "BDUSS=",     // 兼容旧版环境变量
-            "STOKEN=",    // 兼容旧版环境变量
+            "BDUSS=", // 兼容旧版环境变量
+            "STOKEN=", // 兼容旧版环境变量
             "百度Cookie=" // 新版统一认证格式
         ]
     }
@@ -2022,7 +2022,7 @@ class BaiduPan {
 
 
 
-        async validateCookie() {
+    async validateCookie() {
         try {
             const resp = await axios.get('https://pan.baidu.com/api/user/info', {
                 headers: this._getAuthHeaders(),
@@ -2033,8 +2033,8 @@ class BaiduPan {
             return false;
         }
     }
-    
-        _getAuthHeaders() {
+
+    _getAuthHeaders() {
         return {
             'Cookie': this.cookie,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -2050,7 +2050,7 @@ class BaiduPan {
             uzTag: this.uzTag
         });
     }
-    
+
     async clearAuth() {
         this.cookie = ''
         await UZUtils.setStorage({
@@ -2297,6 +2297,22 @@ class PanTools {
      */
     async updateQuarkUCCookie(panType, cookie) {
         await this.setPanEnv(panType + 'Cookie', cookie)
+    }
+
+    /**
+     * 获取百度网盘的Cookie
+     * @returns {Promise<string>} Cookie字符串
+     */
+    async getBaiduCookie() {
+        return this.getPanEnv('baiduCookie'); // 使用统一环境变量管理
+    }
+
+    /**
+     * 更新百度网盘的Cookie
+     * @param {string} cookie 
+     */
+    async updateBaiduCookie(cookie) {
+        await this.setPanEnv('baiduCookie', cookie); // 存储到环境变量
     }
 
     /**
