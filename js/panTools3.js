@@ -1966,108 +1966,60 @@ class Pan189 {
 // 百度网盘
 class BaiduPan {
     constructor() {
-        this.regex = /https:\/\/pan\.baidu\.com\/s\/([^\s]+)/
-        this.apiUrl = 'https://pan.baidu.com/api/'
-        this.shareApiUrl = 'https://pan.baidu.com/share/'
-        this.loginUrl = 'https://passport.baidu.com/v2/api/?login'
-        this.cookie = ''
-        this.authKey = 'baiduPanAuth'
-        this.cookiePatterns = [
-            "BDUSS=", // 兼容旧版环境变量
-            "STOKEN=", // 兼容旧版环境变量
-            "百度Cookie=" // 新版统一认证格式
-        ]
+        this.regex = /https:\/\/pan\.baidu\.com\/s\/([\w-]+)/;
+        this.apiUrl = 'https://pan.baidu.com/rest/2.0/xpan/';
+        this.shareApiUrl = 'https://pan.baidu.com/share/';
+        
+        this.ensureUrl = (url) => url.startsWith('http') ? url : `https:${url}`;
     }
+    this.cookiePatterns = [
+        "BDUSS=", // 兼容旧版环境变量
+        "STOKEN=", // 兼容旧版环境变量
+        "百度Cookie=" // 新版统一认证格式
+    ]
+}
 
-    uzTag = ''
-    fileName = ''
+uzTag = ''
+fileName = ''
 
-    async init() {
-        try {
-            // 1. 优先读取新版统一环境变量
-            this.cookie = await getEnv(this.uzTag, '百度Cookie') || '';
+async init() {
+    try {
+        // 1. 优先读取新版统一环境变量
+        this.cookie = await getEnv(this.uzTag, '百度Cookie') || '';
 
-            // 2. 新版不存在则读取旧版分散环境变量
-            if (!this.cookie) {
-                const parts = [];
-                for (const key of ["BDUSS", "STOKEN"]) {
-                    const value = await getEnv(this.uzTag, key) || '';
-                    if (value) parts.push(`${key}=${value}`);
-                }
-                if (parts.length > 0) this.cookie = parts.join('; ');
+        // 2. 新版不存在则读取旧版分散环境变量
+        if (!this.cookie) {
+            const parts = [];
+            for (const key of ["BDUSS", "STOKEN"]) {
+                const value = await getEnv(this.uzTag, key) || '';
+                if (value) parts.push(`${key}=${value}`);
             }
+            if (parts.length > 0) this.cookie = parts.join('; ');
+        }
 
-            // 3. 环境变量未设置时读取本地存储
-            if (!this.cookie) {
-                const auth = await UZUtils.getStorage({
-                    key: this.authKey,
-                    uzTag: this.uzTag
-                }) || '';
-                this.cookie = auth;
+        // 3. 环境变量未设置时读取本地存储
+        if (!this.cookie) {
+            const auth = await UZUtils.getStorage({
+                key: this.authKey,
+                uzTag: this.uzTag
+            }) || '';
+            this.cookie = auth;
+        }
+
+        // 4. 验证并清理无效Cookie
+        if (this.cookie) {
+            const isValid = await this.validateCookie();
+            if (!isValid) {
+                await this.clearAuth();
+                throw new Error('Cookie验证失败，请重新登录');
             }
-
-            // 4. 验证并清理无效Cookie
-            if (this.cookie) {
-                const isValid = await this.validateCookie();
-                if (!isValid) {
-                    await this.clearAuth();
-                    throw new Error('Cookie验证失败，请重新登录');
-                }
-            }
-        } catch (error) {
-            console.error('百度网盘初始化失败:', error);
-            throw error;
         }
-    }
-
-    async getFileListForMount(dir = '/', page = 1) {
-        try {
-            const resp = await axios.get('https://pan.baidu.com/api/list', {
-                params: {
-                    dir: encodeURIComponent(dir),
-                    page: page,
-                    num: 200, // 每页数量
-                    order: 'time',
-                    desc: 1,
-                    showempty: 0
-                },
-                headers: this._getAuthHeaders()
-            });
-
-            if (resp.data.errno !== 0) throw new Error(resp.data.errmsg);
-
-            return resp.data.list.map(item => ({
-                path: item.path, // 文件完整路径
-                name: item.server_filename,
-                size: item.size,
-                time: item.server_mtime,
-                isdir: item.isdir, // 是否是目录
-                category: item.category // 文件类型
-            }));
-        } catch (error) {
-            console.error('获取文件列表失败:', error);
-            return [];
-        }
-    }
-
-    async getMountFileUrl(filePath) {
-        try {
-            const resp = await axios.get('https://pan.baidu.com/api/download', {
-                params: {
-                    path: encodeURIComponent(filePath),
-                    app_id: 250528
-                },
-                headers: this._getAuthHeaders()
-            });
-
-            if (resp.data.errno !== 0) throw new Error(resp.data.errmsg);
-            return resp.data.url;
-        } catch (error) {
-            console.error('获取文件地址失败:', error);
-            return '';
-        }
+    } catch (error) {
+        console.error('百度网盘初始化失败:', error);
+        throw error;
     }
 }
+
 
 
 async validateCookie() {
@@ -2085,7 +2037,7 @@ async validateCookie() {
 _getAuthHeaders() {
     return {
         'Cookie': this.cookie,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
         'Referer': 'https://pan.baidu.com/'
     };
 }
@@ -2266,18 +2218,22 @@ async getPlayUrl(item) {
 
 async getDownloadLink(fileData) {
     try {
-        const resp = await axios.get(`${this.apiUrl}sharedownload?app_id=250528&channel=chunlei&clienttype=12&sign=${fileData.sign}&timestamp=${fileData.timestamp}&web=1`, {
+        const metaResp = await axios.get(`${this.apiUrl}filemetas`, {
             params: {
-                encrypt: 0,
-                product: 'share',
-                uk: fileData.uk,
-                primaryid: fileData.shareid,
-                fid: fileData.fs_id
+                fsids: [fileData.fs_id],
+                dlink: 1
             },
             headers: this._getAuthHeaders()
         });
 
-        return resp.data?.errno === 0 ? resp.data.dlink : null;
+        const fileMeta = metaResp.data?.list?.[0];
+        if (!fileMeta?.dlink) return null;
+
+        // 确保 URL 包含协议
+        const rawUrl = this.ensureUrl(fileMeta.dlink);
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        return `${rawUrl}&access_token=${this._extractToken()}&expires=${timestamp + 3600}`;
     } catch (error) {
         console.error('获取下载链接失败:', error);
         return null;
