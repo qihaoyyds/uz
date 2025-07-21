@@ -109,6 +109,8 @@ class PanPlayInfo {
     }
 }
 
+
+
 /**
  * 网盘视频项
  */
@@ -134,6 +136,8 @@ class PanVideoItem {
          * @type {PanType}
          **/
         this.panType = PanType.UC
+
+        this.panType = PanType.BaiduPan
 
         /**
          * 关键数据 用于获取播放信息时
@@ -166,6 +170,7 @@ class PanListDetail {
  */
 class PanMount {
     constructor(name = '', panType = PanType.UC, isLogin = false) {
+        constructor(name = '', panType = PanType.BaiduPan, isLogin = false)
         /**
          * 网盘展示名称
          */
@@ -212,6 +217,7 @@ const PanDataType = {
 class PanMountListData {
     constructor(
         name = '',
+        panType = PanType.BaiduPan,
         panType = PanType.UC,
         dataType = PanDataType.Dir,
         data = {},
@@ -1973,8 +1979,8 @@ class BaiduPan {
         this.cookie = ''
         this.authKey = 'baiduPanAuth'
         this.cookiePatterns = [
-            "BDUSS=",     // 兼容旧版环境变量
-            "STOKEN=",    // 兼容旧版环境变量
+            "BDUSS=", // 兼容旧版环境变量
+            "STOKEN=", // 兼容旧版环境变量
             "百度Cookie=" // 新版统一认证格式
         ]
     }
@@ -2022,7 +2028,7 @@ class BaiduPan {
 
 
 
-        async validateCookie() {
+    async validateCookie() {
         try {
             const resp = await axios.get('https://pan.baidu.com/api/user/info', {
                 headers: this._getAuthHeaders(),
@@ -2033,8 +2039,8 @@ class BaiduPan {
             return false;
         }
     }
-    
-        _getAuthHeaders() {
+
+    _getAuthHeaders() {
         return {
             'Cookie': this.cookie,
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -2050,7 +2056,7 @@ class BaiduPan {
             uzTag: this.uzTag
         });
     }
-    
+
     async clearAuth() {
         this.cookie = ''
         await UZUtils.setStorage({
@@ -2330,6 +2336,10 @@ class PanTools {
         this.uc.updateCookie = function() {
             that.updateQuarkUCCookie(PanType.UC, this.cookie)
         }
+        async getAllCookie() {
+            this.baidu.cookie = (await this.getPanEnv('百度Cookie')) || ''
+            await this.baidu.init()
+        }
     }
 
     async getAllCookie() {
@@ -2350,8 +2360,6 @@ class PanTools {
             (await this.getPanEnv(PanType.Pan189 + '账号')) ?? ''
         this.pan189.password =
             (await this.getPanEnv(PanType.Pan189 + '密码')) ?? ''
-        this.baidu.cookie = (await this.getPanEnv(PanType.Baidu + 'Cookie')) ?? ''
-        await this.baidu.init()
     }
 
     /**
@@ -2398,7 +2406,7 @@ class PanTools {
         } else if (shareUrl.includes('189.cn')) {
             const data = await this.pan189.getShareData(shareUrl)
             return JSON.stringify(data)
-        } else if (shareUrl.includes('baidu.com')) {
+        } else if (shareUrl.includes('https://pan.baidu.com')) {
             const data = await this.baidu.getFilesByShareUrl(shareUrl)
             return JSON.stringify(data)
         }
@@ -2450,7 +2458,7 @@ class PanTools {
         let x = formatBackData([
             new PanMount('UC', PanType.UC, this.uc.cookie !== ''),
             new PanMount('Quark', PanType.Quark, this.quark.cookie !== ''),
-            new PanMount('百度网盘', PanType.Baidu, this.baidu.cookie !== ''),
+            new PanMount('百度网盘', PanType.BaiduPan, this.baidu.cookie !== ''),
         ])
 
         return x
