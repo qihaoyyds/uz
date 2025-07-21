@@ -1971,6 +1971,7 @@ class BaiduPan {
         this.shareApiUrl = 'https://pan.baidu.com/share/'
         this.loginUrl = 'https://passport.baidu.com/v2/api/?login'
         this.cookie = ''
+        this.envVarName = '百度Cookie' // 确保与配置文件声明的环境变量名一致
         this.authKey = 'baiduPanAuth'
     }
 
@@ -1980,25 +1981,33 @@ class BaiduPan {
 
     async init() {
         try {
-            // 优先从环境变量读取Cookie
-            this.cookie = await getEnv(this.uzTag, '百度Cookie');
+            // 从环境变量读取Cookie（使用配置文件声明的变量名）
+            this.cookie = await getEnv('', this.envVarName) // 第一个参数通常留空
 
-            // 环境变量未设置时，回退到本地存储
+            // 环境变量未设置时的处理
             if (!this.cookie) {
+                console.warn('环境变量未设置，尝试本地存储')
                 const auth = await UZUtils.getStorage({
                     key: this.authKey,
                     uzTag: this.uzTag
                 });
-                if (auth?.length > 0) this.cookie = auth;
+                this.cookie = auth || ''
             }
 
-            // 验证Cookie有效性
+            // 存在Cookie时验证有效性
             if (this.cookie) {
-                const isValid = await this.validateCookie();
-                if (!isValid) await this.clearAuth();
+                const isValid = await this.validateCookie()
+                if (!isValid) {
+                    console.warn('Cookie已失效，正在清除')
+                    await this.clearAuth()
+                    this.cookie = ''
+                }
+            } else {
+                console.warn('未找到有效的百度网盘授权信息')
             }
         } catch (error) {
-            console.error('初始化失败:', error);
+            console.error('初始化失败:', error)
+            this.cookie = ''
         }
     }
 
