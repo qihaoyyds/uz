@@ -192,15 +192,6 @@
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/nanfdj.js",
             "type": 101
-        },
-        {
-            "name": "我的 | 夸克",
-            "version": 1,
-            "remark": "Q群511873584 「柒豪」维护",
-            "webSite": "https://pan.quark.cn",
-            "order": "A",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/qi.js",
-            "type": 101
         }
     ]
 }
