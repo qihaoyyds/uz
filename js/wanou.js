@@ -5,47 +5,19 @@
 //@order: B
 // ignore
 const appConfig = {
-    _multiDomains: [
-        "https://wogg.xxooo.cf",
-        "https://wogg.333232.xyz",
-        "https://woggpan.333232.xyz",
-        "https://wogg.heshiheng.top",
-        "https://www.wogg.one",
-        "https://www.wogg.lol"
-    ],
-    _currentDomainIndex: 0,
-    _maxRetries: 2, // 单域名最大重试次数
-
-    // 动态获取当前域名（随机选择避免单点负载）
+    _webSite: 'https://wogg.333232.xyz',
+    /**
+     * 网站主页，uz 调用每个函数前都会进行赋值操作
+     * 如果不想被改变 请自定义一个变量
+     */
     get webSite() {
-        return this._multiDomains[this._currentDomainIndex];
+        return this._webSite
+    },
+    set webSite(value) {
+        this._webSite = value
     },
 
-    // 域名轮换（失败时触发）
-    rotateDomain() {
-        this._currentDomainIndex = (this._currentDomainIndex + 1) % this._multiDomains.length;
-        console.warn(`域名切换至: ${this.webSite}`);
-    },
-
-    // 域名健康检查（定时执行）
-    async checkHealth() {
-        for (let i = 0; i < this._multiDomains.length; i++) {
-            try {
-                await fetch(`${this._multiDomains[i]}/health-check`, {
-                    timeout: 3000
-                });
-            } catch {
-                this._multiDomains.splice(i, 1); // 移除失效域名
-                if (this._currentDomainIndex >= i) this.rotateDomain();
-            }
-        }
-    }
-};
-// 每30分钟检查域名健康
-setInterval(() => appConfig.checkHealth(), 1800_000);
-
-
-_uzTag: '',
+    _uzTag: '',
     /**
      * 扩展标识，初次加载时，uz 会自动赋值，请勿修改
      * 用于读取环境变量
@@ -112,28 +84,35 @@ async function getSubclassVideoList(args) {
  * @returns {Promise<RepVideoList>}
  */
 async function getVideoList(args) {
-    const backData = new RepVideoList();
+    var backData = new RepVideoList()
+    let url =
+        UZUtils.removeTrailingSlash(appConfig.webSite) +
+        `/vodshow/${args.url}--------${args.page}---.html`
     try {
-        backData.data = await safeRequest(
-            `/vodshow/${args.url}--------${args.page}---.html`,
-            html => {
-                const $ = cheerio.load(html);
-                return $('#main .module-item').map((_, e) => {
-                    return {
-                        vod_id: $(e).find('.module-item-pic a').attr('href'),
-                        vod_name: $(e).find('.module-item-pic img').attr('alt'),
-                        vod_pic: $(e).find('.module-item-pic img').attr('data-src'),
-                        vod_remarks: $(e).find('.module-item-text').text()
-                    };
-                }).get();
-            }
-        );
-    } catch (error) {
-        backData.error = error.message;
-    }
-    return JSON.stringify(backData);
-}
+        const pro = await req(url)
+        backData.error = pro.error
 
+        let videos = []
+        if (pro.data) {
+            const $ = cheerio.load(pro.data)
+            let vodItems = $('#main .module-item')
+            vodItems.each((_, e) => {
+                let videoDet = new VideoDetail()
+                videoDet.vod_id = $(e).find('.module-item-pic a').attr('href')
+                videoDet.vod_name = $(e)
+                    .find('.module-item-pic img')
+                    .attr('alt')
+                videoDet.vod_pic = $(e)
+                    .find('.module-item-pic img')
+                    .attr('data-src')
+                videoDet.vod_remarks = $(e).find('.module-item-text').text()
+                videos.push(videoDet)
+            })
+        }
+        backData.data = videos
+    } catch (error) {}
+    return JSON.stringify(backData)
+}
 
 /**
  * 获取视频详情
