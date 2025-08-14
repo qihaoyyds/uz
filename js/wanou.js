@@ -1,20 +1,35 @@
 // ignore
 //@version:1
-//@webSite:http://wogg.xxooo.cf
+//@webSite:https://vip.omii.top
 //@remark:
 //@order: B
 // ignore
 const appConfig = {
-    _webSite: 'https://wogg.333232.xyz',
+    // 域名数组（支持多个备用域名）
+    domains: [
+        "https://wogg.xxooo.cf",
+        "https://wogg.333232.xyz",
+        "https://woggpan.333232.xyz",
+        "https://wogg.heshiheng.top",
+        "https://www.wogg.one",
+        "https://www.wogg.lol"
+    ],
+    // 当前域名索引
+    currentDomainIndex: 0,
+
     /**
-     * 网站主页，uz 调用每个函数前都会进行赋值操作
-     * 如果不想被改变 请自定义一个变量
+     * 获取当前域名
      */
-    get webSite() {
-        return this._webSite
+    get currentDomain() {
+        return this.domains[this.currentDomainIndex];
     },
-    set webSite(value) {
-        this._webSite = value
+
+    /**
+     * 轮询切换到下一个域名
+     */
+    rotateDomain() {
+        this.currentDomainIndex = (this.currentDomainIndex + 1) % this.domains.length;
+        console.log('切换到域名:', this.currentDomain);
     },
 
     _uzTag: '',
@@ -28,6 +43,39 @@ const appConfig = {
     set uzTag(value) {
         this._uzTag = value
     },
+}
+
+/**
+ * 支持多域名的请求封装
+ * @param {string} path 请求路径（相对路径）
+ * @param {number} maxRetries 最大重试次数（默认等于域名数量）
+ * @returns 请求结果
+ */
+async function multiDomainReq(path, maxRetries = appConfig.domains.length) {
+    let lastError = null;
+
+    for (let i = 0; i < maxRetries; i++) {
+        const fullUrl = UZUtils.removeTrailingSlash(appConfig.currentDomain) + path;
+
+        try {
+            const response = await req(fullUrl);
+            // 请求成功直接返回
+            if (!response.error) return response;
+
+            // 如果有错误信息，记录并重试
+            lastError = response.error;
+            console.warn(`请求失败 (${fullUrl}): ${response.error}`);
+        } catch (error) {
+            lastError = error;
+            console.error(`请求异常 (${fullUrl}):`, error);
+        }
+
+        // 切换到下一个域名
+        appConfig.rotateDomain();
+    }
+
+    // 所有重试都失败
+    throw new Error(`所有域名请求均失败: ${lastError || '未知错误'}`);
 }
 
 /**
@@ -58,11 +106,6 @@ async function getClassList(args) {
             hasSubclass: false,
         },
         {
-            type_id: '44',
-            type_name: '臻彩视界',
-            hasSubclass: false,
-        },
-        {
             type_id: '6',
             type_name: '短剧',
             hasSubclass: false,
@@ -85,13 +128,11 @@ async function getSubclassVideoList(args) {
  */
 async function getVideoList(args) {
     var backData = new RepVideoList()
-    let url =
-        UZUtils.removeTrailingSlash(appConfig.webSite) +
-        `/vodshow/${args.url}--------${args.page}---.html`
-    try {
-        const pro = await req(url)
-        backData.error = pro.error
+    let path = `/index.php/vod/show/id/${args.url}/page/${args.page}.html`
 
+    try {
+        const pro = await multiDomainReq(path)
+        backData.error = pro.error
         let videos = []
         if (pro.data) {
             const $ = cheerio.load(pro.data)
@@ -106,11 +147,17 @@ async function getVideoList(args) {
                     .find('.module-item-pic img')
                     .attr('data-src')
                 videoDet.vod_remarks = $(e).find('.module-item-text').text()
+                videoDet.vod_year = $(e)
+                    .find('.module-item-caption span')
+                    .first()
+                    .text()
                 videos.push(videoDet)
             })
         }
         backData.data = videos
-    } catch (error) {}
+    } catch (error) {
+        backData.error = error.message
+    }
     return JSON.stringify(backData)
 }
 
@@ -122,8 +169,7 @@ async function getVideoList(args) {
 async function getVideoDetail(args) {
     var backData = new RepVideoDetail()
     try {
-        let webUrl = UZUtils.removeTrailingSlash(appConfig.webSite) + args.url
-        let pro = await req(webUrl)
+        let pro = await multiDomainReq(args.url)
 
         backData.error = pro.error
         let proData = pro.data
@@ -151,8 +197,12 @@ async function getVideoDetail(args) {
                     .filter(Boolean) // 过滤掉 null 和空字符串
                     .join(', ') // 用逗号和空格分割
 
-                if (key.includes('年代')) {
-                    vodDetail.vod_year = value.trim()
+                if (key.includes('剧情')) {
+                    vodDetail.vod_content = $(item)
+                        .next()
+                        .find('p')
+                        .text()
+                        .trim()
                 } else if (key.includes('导演')) {
                     vodDetail.vod_director = value.trim()
                 } else if (key.includes('主演')) {
@@ -172,7 +222,7 @@ async function getVideoDetail(args) {
             backData.data = vodDetail
         }
     } catch (error) {
-        backData.error = '获取视频详情失败' + error
+        backData.error = '获取视频详情失败: ' + error.message
     }
 
     return JSON.stringify(backData)
@@ -196,15 +246,8 @@ async function getVideoPlayUrl(args) {
 async function searchVideo(args) {
     var backData = new RepVideoList()
     try {
-        let searchUrl = combineUrl(
-            'vodsearch/' +
-            args.searchWord +
-            '----------' +
-            args.page +
-            '---.html'
-        )
-        let repData = await req(searchUrl)
-
+        let path = `/index.php/vod/search/page/${args.page}/wd/${encodeURIComponent(args.searchWord)}.html`
+        let repData = await multiDomainReq(path)
         const $ = cheerio.load(repData.data)
         let items = $('.module-search-item')
 
@@ -219,20 +262,7 @@ async function searchVideo(args) {
             backData.data.push(video)
         }
     } catch (error) {
-        backData.error = error
+        backData.error = error.message
     }
     return JSON.stringify(backData)
-}
-
-function combineUrl(url) {
-    if (url === undefined) {
-        return ''
-    }
-    if (url.indexOf(appConfig.webSite) !== -1) {
-        return url
-    }
-    if (url.startsWith('/')) {
-        return appConfig.webSite + url
-    }
-    return appConfig.webSite + '/' + url
 }
