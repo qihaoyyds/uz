@@ -5,7 +5,7 @@
 //@order: B
 // ignore
 const appConfig = {
-    __webSite: [
+    _multiDomains: [
         "https://wogg.xxooo.cf",
         "https://wogg.333232.xyz",
         "https://woggpan.333232.xyz",
