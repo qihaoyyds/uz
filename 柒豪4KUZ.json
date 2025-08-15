@@ -86,28 +86,10 @@
             "type": 101
         },
         {
-            "name": "下饭 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/xiafan.js",
-            "webSite": "http://154.204.177.231",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
             "name": "二小 | 4K",
             "order": "B",
             "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/erxiao.js",
             "webSite": "https://xhww.net/",
-            "remark": "Q群511873584 「柒豪」维护",
-            "version": "3",
-            "type": 101
-        },
-        {
-            "name": "奥秘 | 4K",
-            "order": "B",
-            "api": "https://ghfast.top/https://raw.githubusercontent.com/qihaoyyds/uz/main/js/aomi.js",
-            "webSite": "https://vip.omii.top",
             "remark": "Q群511873584 「柒豪」维护",
             "version": "3",
             "type": 101
